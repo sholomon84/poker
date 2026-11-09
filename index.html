@@ -145,7 +145,8 @@ body.phone #controls button{padding:14px 18px;font-size:17px}
 <div id="log"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://unpkg.com/mqtt@5/dist/mqtt.min.js"></script>
+<script>if(!window.mqtt)document.write('<script src="https://cdn.jsdelivr.net/npm/mqtt@5/dist/mqtt.min.js"><\/script>')</script>
 <script>
 // ================== Карты и оценка рук ==================
 const UI = typeof document !== 'undefined';
@@ -394,7 +395,7 @@ function botMove(i){
 // ================== Интерфейс ==================
 const $ = id => UI ? document.getElementById(id) : null;
 const POS = [{l:50,t:85},{l:11,t:46},{l:50,t:13},{l:89,t:46}];
-const hashCode = () => { const m = UI && location.hash.match(/^#p-([a-z0-9]{4,8})$/); return m ? m[1] : null; };
+const hashCode = () => { const m = UI && location.hash.match(/^#p-([a-z0-9]{4,8})(?:-(\d))?$/); return m ? {c:m[1], b:+(m[2]||0)} : null; };
 let PHONE = false;          // этот экран — телефон игрока
 let phoneOn = false;        // (на столе) телефон подключён
 let roomCode = '';
@@ -499,8 +500,8 @@ function updRaiseLabel(){
 }
 function doAction(type, to){
   if (PHONE){
-    if (!pConn || !pConn.open || !cm) return;
-    try{ pConn.send({k:'act', a:{type, to:to||0, h:cm.h, s:cm.s, cb:cm.cb}}); }catch(e){ return; }
+    if (!pClient || !pClient.connected || !cm) return;
+    pClient.publish(TOPIC(window._pcode)+'/up', JSON.stringify({k:'act', a:{type, to:to||0, h:cm.h, s:cm.s, cb:cm.cb}}));
     // сразу прячем кнопки, ждём ответа стола
     $('actRow').style.display='none'; $('raiseRow').style.display='none'; $('bNext').style.display='none';
     $('msg').textContent='Отправлено…';
@@ -511,16 +512,29 @@ function doAction(type, to){
   }
 }
 
-// ---------- Стол: связь с телефоном (PeerJS, напрямую между устройствами) ----------
-const PREFIX='hldm-tbl-';
-let peer=null, conns=[], tableTimer=null;
+// ---------- Связь стол <-> телефон через публичные MQTT-серверы ----------
+const BROKERS=[
+  'wss://broker.emqx.io:8084/mqtt',
+  'wss://broker.hivemq.com:8884/mqtt',
+  'wss://test.mosquitto.org:8081/mqtt',
+];
+const TOPIC = code => 'hldm-poker/v1/'+code;
+let tClient=null, tBroker=-1, phoneSeen=0, tableTimer=null;
+function mqttConnect(i, onOk, onFail){
+  let done=false;
+  const c = mqtt.connect(BROKERS[i], {clientId:'hp'+Math.random().toString(36).slice(2,10), connectTimeout:6000, reconnectPeriod:2000, keepalive:20, clean:true});
+  const t=setTimeout(()=>{ if(!done){ done=true; try{c.end(true);}catch(e){} onFail(); } }, 7000);
+  c.on('connect', ()=>{ if(!done){ done=true; clearTimeout(t); onOk(c); } });
+  c.on('error', ()=>{});
+  return c;
+}
 function syncPhone(force, m){
-  if (PHONE || !conns.length) return;
+  if (PHONE || !tClient || !tClient.connected || (!phoneOn && !force)) return;
   m = m || model();
   const s = JSON.stringify(m);
   if (!force && s===lastSent) return;
   lastSent = s;
-  conns.forEach(c=>{ if (c.open) try{ c.send({k:'st', m}); }catch(e){} });
+  tClient.publish(TOPIC(roomCode)+'/down', JSON.stringify({k:'st', m}));
 }
 function onPhoneAction(d){
   if (!d || typeof d!=='object') return;
@@ -531,9 +545,7 @@ function onPhoneAction(d){
   act(0, d.type, Math.round(+d.to||0));
 }
 function updPhoneOn(){
-  const now=Date.now();
-  conns = conns.filter(c=>{ if (c.open && now-c._seen<9000) return true; try{ c.close(); }catch(e){} return false; });
-  const was=phoneOn; phoneOn = conns.length>0;
+  const was=phoneOn; phoneOn = Date.now()-phoneSeen < 8000;
   if (was!==phoneOn){
     setPhoneStatus(phoneOn ? '✅ Телефон подключён' : 'Ждём телефон…');
     if (phoneOn) $('qrPanel').classList.remove('on');
@@ -541,31 +553,36 @@ function updPhoneOn(){
   }
 }
 function initTable(){
-  if (!window.Peer) return setPhoneStatus('Не загрузилась библиотека связи (PeerJS). Проверь интернет и обнови страницу');
+  if (!window.mqtt) return setPhoneStatus('Не загрузилась библиотека связи. Проверь интернет и обнови страницу');
   roomCode = Math.random().toString(36).slice(2,8).replace(/[^a-z0-9]/g,'a').padEnd(6,'x');
-  peer = new Peer(PREFIX+roomCode);
-  peer.on('open', ()=>{ drawQR(); setPhoneStatus(phoneOn ? '✅ Телефон подключён' : 'Ждём телефон…'); });
-  peer.on('connection', c=>{
-    c._seen=Date.now();
-    c.on('open', ()=>{ c._seen=Date.now(); conns.push(c); updPhoneOn(); syncPhone(true); });
-    c.on('data', d=>{ c._seen=Date.now(); if (d && d.k==='act') onPhoneAction(d.a); });
-    c.on('close', updPhoneOn);
-    c.on('error', updPhoneOn);
-  });
-  peer.on('disconnected', ()=>{ try{ peer.reconnect(); }catch(e){} });
-  peer.on('error', e=>{
-    if (e.type==='unavailable-id'){ try{ peer.destroy(); }catch(_){} initTable(); }
-    else if (!phoneOn) setPhoneStatus('Ошибка связи: '+e.type);
-  });
-  if (!tableTimer) tableTimer=setInterval(()=>{ updPhoneOn(); syncPhone(true); }, 2500);
-  setPhoneStatus('Соединяюсь с сервером…');
+  const tryB = i=>{
+    if (i>=BROKERS.length){ setPhoneStatus('❌ Ни один сервер связи не ответил. Проверь интернет и обнови страницу'); return; }
+    setPhoneStatus(`Соединяюсь с сервером ${i+1} из ${BROKERS.length}…`);
+    mqttConnect(i, c=>{
+      tClient=c; tBroker=i;
+      const sub=()=>c.subscribe(TOPIC(roomCode)+'/up');
+      sub(); c.on('connect', sub);
+      c.on('message', (topic, buf)=>{
+        let d; try{ d=JSON.parse(buf.toString()); }catch(e){ return; }
+        const first = !phoneOn;
+        phoneSeen=Date.now(); updPhoneOn();
+        if (first) syncPhone(true);
+        if (d.k==='act') onPhoneAction(d.a);
+        else if (d.k==='hello') syncPhone(true);
+      });
+      drawQR();
+      setPhoneStatus(phoneOn ? '✅ Телефон подключён' : `Ждём телефон… (сервер ${i+1})`);
+    }, ()=>tryB(i+1));
+  };
+  tryB(0);
+  if (!tableTimer) tableTimer=setInterval(()=>{ updPhoneOn(); if (phoneOn) syncPhone(true); }, 2500);
 }
 function setPhoneStatus(t){ if (UI) $('phoneStatus').textContent=t; }
 function drawQR(){
   $('qr').innerHTML='';
-  if (!roomCode){ $('qrLink').textContent=''; return; }
-  if (location.protocol==='file:'){ $('qrLink').textContent='Страница открыта как файл с диска. Чтобы телефон подключился, открой её по ссылке GitHub Pages (https://…)'; return; }
-  const url = location.origin + location.pathname + '#p-' + roomCode;
+  if (!roomCode || tBroker<0){ $('qrLink').textContent='Подожди, подключаюсь к серверу…'; return; }
+  if (location.protocol==='file:'){ $('qrLink').textContent='Страница открыта как файл. Открой её по ссылке GitHub Pages (https://…)'; return; }
+  const url = location.origin + location.pathname + '#p-' + roomCode + '-' + tBroker;
   $('qrLink').textContent = url;
   if (window.QRCode) new QRCode($('qr'), {text:url, width:220, height:220, correctLevel:QRCode.CorrectLevel.M});
   else $('qr').textContent='QR не загрузился — открой ссылку ниже на телефоне';
@@ -591,40 +608,32 @@ function renderPhone(){
   if (m.gameEnded){ $('bNext').style.display='inline-block'; $('bNext').textContent='Новая игра'; }
   else $('bNext').textContent='Следующая раздача';
 }
-let pPeer=null, pConn=null, pErr='', pTry=0;
-function phoneConnect(code){
-  if (pConn) try{ pConn.close(); }catch(e){}
-  const c = pConn = pPeer.connect(PREFIX+code, {reliable:true});
-  c.on('data', d=>{ if (c!==pConn) return; if (d && d.k==='st'){ pm=d.m; pmSeen=Date.now(); pErr=''; renderPhone(); } });
-}
-function initPhone(code){
+let pClient=null;
+function initPhone(code, bi){
   PHONE=true; document.body.classList.add('phone');
   $('bNew').style.display='none';
+  ['actRow','raiseRow','bNext'].forEach(id=>$(id).style.display='none');
   $('msg').textContent='Подключаюсь к столу…';
   const conn = t => { $('pConn').textContent=t; };
-  if (!window.Peer){ conn('Не загрузилась библиотека связи (PeerJS). Проверь интернет и обнови страницу'); return; }
-  const start = ()=>{
-    if (pPeer) try{ pPeer.destroy(); }catch(e){}
-    pPeer = new Peer();
-    pPeer.on('open', ()=>phoneConnect(code));
-    pPeer.on('error', e=>{ pErr = e.type==='peer-unavailable' ? 'стол не найден — открой страницу стола и отсканируй QR заново' : e.type; });
-    pPeer.on('disconnected', ()=>{ try{ pPeer.reconnect(); }catch(e){} });
-    pTry=Date.now();
-  };
-  start();
-  const tick = ()=>{
-    if (pConn && pConn.open) try{ pConn.send({k:'hb'}); }catch(e){}
-    if (pmSeen && Date.now()-pmSeen<7000){ conn('✅ Подключено к столу'); return; }
-    conn((pmSeen ? '⚠️ Нет связи со столом, переподключаюсь…' : 'Подключаюсь к столу…') + (pErr ? ' ('+pErr+')' : ''));
-    if (Date.now()-pTry>6000){
-      pTry=Date.now();
-      if (pPeer.destroyed) start();
-      else if (pPeer.disconnected) { try{ pPeer.reconnect(); }catch(e){ start(); } }
-      else if (pPeer.open) phoneConnect(code);
-    }
-  };
-  setInterval(tick, 1500);
-  document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ pTry=0; tick(); } });
+  if (!window.mqtt){ conn('Не загрузилась библиотека связи. Проверь интернет и обнови страницу'); return; }
+  if (!(bi>=0 && bi<BROKERS.length)) bi=0;
+  window._pcode=code;
+  pClient = mqtt.connect(BROKERS[bi], {clientId:'hp'+Math.random().toString(36).slice(2,10), connectTimeout:8000, reconnectPeriod:2000, keepalive:20, clean:true});
+  pClient.on('connect', ()=>{
+    pClient.subscribe(TOPIC(code)+'/down');
+    pClient.publish(TOPIC(code)+'/up', JSON.stringify({k:'hello'}));
+  });
+  pClient.on('message', (topic, buf)=>{
+    let d; try{ d=JSON.parse(buf.toString()); }catch(e){ return; }
+    if (d.k==='st'){ pm=d.m; pmSeen=Date.now(); renderPhone(); }
+  });
+  pClient.on('error', ()=>{});
+  setInterval(()=>{
+    if (pClient.connected) pClient.publish(TOPIC(code)+'/up', JSON.stringify({k:'hb'}));
+    if (pmSeen && Date.now()-pmSeen<7000) conn('✅ Подключено к столу');
+    else if (!pClient.connected) conn(`Подключаюсь к серверу ${bi+1}…`);
+    else conn(pmSeen ? '⚠️ Нет связи со столом…' : 'Сервер ✓, ждём стол… Если долго — отсканируй QR заново');
+  }, 2000);
 }
 
 if (UI){
@@ -646,7 +655,7 @@ if (UI){
   $('bPhone').onclick = ()=>{ $('qrPanel').classList.add('on'); drawQR(); };
   $('bQrClose').onclick = ()=>$('qrPanel').classList.remove('on');
   const code = hashCode();
-  if (code) initPhone(code);
+  if (code) initPhone(code.c, code.b);
   else { newGame(); initTable(); }
 }
 // для автотеста в node
