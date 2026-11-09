@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Техасский холдем — стол и телефон</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#0d1712;color:#eee;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+header{width:100%;max-width:920px;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-size:14px;gap:10px;flex-wrap:wrap}
+header .info{font-weight:600}
+header label{display:flex;gap:6px;align-items:center;cursor:pointer;user-select:none}
+button{font:inherit;cursor:pointer;border:none;border-radius:8px;padding:10px 16px;font-weight:600;color:#fff;background:#3a4a42}
+button:hover{filter:brightness(1.15)}
+button:disabled{opacity:.4;cursor:default;filter:none}
+.small{padding:6px 10px;font-size:13px}
+.table{position:relative;width:min(920px,98vw);height:clamp(430px,58vw,560px);margin:2px 0 6px}
+.felt{position:absolute;inset:9% 7%;border-radius:999px;background:radial-gradient(ellipse at center,#2f9160 0%,#1e6e43 60%,#134a2d 100%);border:12px solid #5b3b1f;box-shadow:inset 0 0 40px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.6)}
+.center{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);text-align:center}
+.board{display:flex;gap:6px;justify-content:center}
+.pot{margin-top:10px;font-weight:700;background:rgba(0,0,0,.4);padding:5px 14px;border-radius:20px;display:inline-block}
+.card{width:46px;height:66px;border-radius:6px;background:#fff;color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:19px;line-height:1.05;box-shadow:0 2px 5px rgba(0,0,0,.45);transition:transform .2s}
+.card .s{font-size:22px}
+.card.red{color:#d01616}
+.card.back{background:repeating-linear-gradient(45deg,#8b1e2b 0 6px,#a8323f 6px 12px);border:3px solid #fff}
+.card.empty{background:rgba(255,255,255,.07);box-shadow:none;border:1px dashed rgba(255,255,255,.25)}
+.card.win{outline:3px solid #ffd54a;transform:translateY(-4px)}
+.seat{position:absolute;transform:translate(-50%,-50%);text-align:center;min-width:118px}
+.seat .box{background:rgba(0,0,0,.65);border:2px solid #333;border-radius:10px;padding:4px 10px;margin-top:4px}
+.seat.active .box{border-color:#ffd54a;box-shadow:0 0 14px #ffd54a}
+.seat.folded .cards{opacity:.35}
+.seat.out{opacity:.35}
+.seat.winner .box{border-color:#4cff8f;box-shadow:0 0 14px #4cff8f}
+.seat .cards{display:flex;gap:4px;justify-content:center;min-height:66px}
+.seat.me .card{width:56px;height:80px;font-size:23px}
+.seat.me .card .s{font-size:27px}
+.name{font-weight:700;font-size:14px}
+.badge{display:inline-block;font-size:11px;font-weight:800;border-radius:50%;width:19px;height:19px;line-height:19px;margin-left:4px;background:#fff;color:#000}
+.stack{font-size:13px;color:#bfe9cf}
+.status{font-size:12px;color:#ffd54a;min-height:15px}
+.chip{display:inline-block;margin-top:3px;background:#f3c237;color:#222;font-weight:800;font-size:12px;border-radius:12px;padding:1px 8px}
+#controls{width:min(920px,98vw);display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 8px}
+#msg{min-height:22px;font-weight:600;text-align:center}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+#bFold{background:#9a2b2b}
+#bCall{background:#2b6b9a}
+#bRaise{background:#2f8a4a}
+#bNext{background:#c07a12}
+#rng{width:200px}
+#num{width:80px;padding:8px;border-radius:8px;border:1px solid #555;background:#1b2621;color:#fff;font:inherit}
+#log{width:min(920px,98vw);margin:10px 0 24px;padding:8px 12px;background:#111c17;border-radius:10px;font-size:13px;max-height:170px;overflow:auto;color:#b9c9c0}
+#log div{padding:1px 0}
+#log .h{color:#ffd54a;font-weight:600}
+#qrPanel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10;align-items:center;justify-content:center}
+#qrPanel.on{display:flex}
+.qrBox{background:#18241e;border-radius:14px;padding:18px;text-align:center;max-width:92vw}
+#qr{background:#fff;padding:10px;border-radius:8px;display:inline-block;margin:6px 0}
+#qr img,#qr canvas{display:block}
+.qrHint{font-size:12px;color:#9fb5a9;margin:6px 0}
+.qrLink{font-size:11px;word-break:break-all;color:#cfe;margin:4px 0 8px}
+#phoneView{display:none;width:100%;max-width:480px;padding:0 10px;text-align:center}
+body.phone #phoneView{display:block}
+body.phone #tableView, body.phone .tblOnly, body.phone #log{display:none}
+#pOpps{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:4px 0 10px}
+.opp{background:rgba(0,0,0,.45);border:2px solid #333;border-radius:8px;padding:4px 8px;font-size:12px;min-width:90px}
+.opp.active{border-color:#ffd54a}
+.opp.folded{opacity:.45}
+.pTable{background:radial-gradient(ellipse at center,#2f9160,#1a5e39);border-radius:18px;padding:14px 6px;border:6px solid #5b3b1f}
+.pMe{margin:14px 0 6px}
+.pMe .cards{display:flex;gap:10px;justify-content:center}
+.pMe .card{width:92px;height:132px;font-size:38px;border-radius:10px}
+.pMe .card .s{font-size:44px}
+.pStack{font-weight:700;margin-top:8px}
+body.phone #controls button{padding:14px 18px;font-size:17px}
+@media (max-width:600px){
+  .card{width:34px;height:50px;font-size:15px}
+  .card .s{font-size:16px}
+  .seat.me .card{width:48px;height:70px;font-size:20px}
+  .seat{min-width:88px}
+  .seat .box{padding:3px 6px}
+  .name{font-size:12px}
+  .seat .cards{min-height:50px}
+  .felt{inset:10% 3%}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="info" id="info">Раздача #0</div>
+  <label class="tblOnly"><input type="checkbox" id="showAll"> Показать карты ботов</label>
+  <button class="small tblOnly" id="bPhone" style="background:#2b6b9a">📱 Подключить телефон</button>
+  <button class="small" id="bNew">Новая игра</button>
+</header>
+
+<div id="qrPanel">
+  <div class="qrBox">
+    <div style="font-weight:700;margin-bottom:6px">Отсканируй камерой телефона</div>
+    <div id="qr"></div>
+    <div class="qrHint">Телефон и стол — в одной сети Wi-Fi. Ничего устанавливать не нужно</div>
+    <div class="qrLink" id="qrLink"></div>
+    <div id="phoneStatus" class="qrHint"></div>
+    <button class="small" id="bQrClose">Закрыть</button>
+  </div>
+</div>
+
+<div id="phoneView">
+  <div id="pOpps"></div>
+  <div class="pTable">
+    <div class="board" id="pBoard"></div>
+    <div class="pot" id="pPot">Банк: 0</div>
+  </div>
+  <div class="pMe">
+    <div class="cards" id="pHand"></div>
+    <div id="pStack" class="pStack"></div>
+    <div id="pResult" class="status"></div>
+  </div>
+  <div id="pConn" class="qrHint"></div>
+</div>
+
+<div class="table" id="tableView">
+  <div class="felt"></div>
+  <div class="center">
+    <div class="board" id="board"></div>
+    <div class="pot" id="pot">Банк: 0</div>
+  </div>
+  <div id="seats"></div>
+</div>
+
+<div id="controls">
+  <div id="msg"></div>
+  <div class="row" id="actRow">
+    <button id="bFold">Фолд</button>
+    <button id="bCall">Чек</button>
+    <button id="bRaise">Рейз</button>
+  </div>
+  <div class="row" id="raiseRow">
+    <input type="range" id="rng">
+    <input type="number" id="num">
+    <button class="small" data-p="0.5">½ банка</button>
+    <button class="small" data-p="1">Банк</button>
+    <button class="small" data-p="all">Олл-ин</button>
+  </div>
+  <button id="bNext">Следующая раздача</button>
+</div>
+<div id="log"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+// ================== Карты и оценка рук ==================
+const UI = typeof document !== 'undefined';
+const SUITS = ['♠','♥','♦','♣'];
+const RN = {10:'10',11:'J',12:'Q',13:'K',14:'A'};
+const rn = r => RN[r] || String(r);
+const cs = c => rn(c.r) + SUITS[c.s];
+const key = c => c.r * 4 + c.s;
+const HN = ['Старшая карта','Пара','Две пары','Сет','Стрит','Флеш','Фулл-хаус','Каре','Стрит-флеш'];
+const B5 = 15 ** 5;
+
+function newDeck(){ const d=[]; for(let s=0;s<4;s++) for(let r=2;r<=14;r++) d.push({r,s}); return d; }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function eval5(c){
+  const rs = c.map(x=>x.r).sort((a,b)=>b-a);
+  const fl = c.every(x=>x.s===c[0].s);
+  const cnt = {}; rs.forEach(r=>cnt[r]=(cnt[r]||0)+1);
+  const g = Object.keys(cnt).map(Number).sort((a,b)=>cnt[b]-cnt[a] || b-a);
+  let st = 0;
+  if (g.length===5){ if (rs[0]-rs[4]===4) st=rs[0]; else if (rs[0]===14 && rs[1]===5) st=5; }
+  let cat, t;
+  if (st && fl){ cat=8; t=[st]; }
+  else if (cnt[g[0]]===4){ cat=7; t=g; }
+  else if (cnt[g[0]]===3 && cnt[g[1]]===2){ cat=6; t=g; }
+  else if (fl){ cat=5; t=rs; }
+  else if (st){ cat=4; t=[st]; }
+  else if (cnt[g[0]]===3){ cat=3; t=g; }
+  else if (cnt[g[0]]===2 && cnt[g[1]]===2){ cat=2; t=g; }
+  else if (cnt[g[0]]===2){ cat=1; t=g; }
+  else { cat=0; t=rs; }
+  let v = cat; for (let i=0;i<5;i++) v = v*15 + (t[i]||0);
+  return v;
+}
+const SKIP = []; for(let a=0;a<7;a++) for(let b=a+1;b<7;b++) SKIP.push([a,b]);
+function best7(c){
+  let bv=-1, bc=null;
+  for (const [a,b] of SKIP){
+    const f = c.filter((_,i)=>i!==a && i!==b);
+    const v = eval5(f);
+    if (v>bv){ bv=v; bc=f; }
+  }
+  return { v:bv, cards:bc, cat:Math.floor(bv/B5) };
+}
+function handName(b){
+  if (b.cat===8 && Math.floor(b.v/15**4)%15===14) return 'Роял-флеш';
+  return HN[b.cat];
+}
+// Монте-Карло: вероятность выиграть против nOpp случайных рук
+function equity(hole, board, nOpp, iters){
+  const known = new Set([...hole,...board].map(key));
+  const rest = newDeck().filter(c=>!known.has(key(c)));
+  let score = 0;
+  for (let it=0; it<iters; it++){
+    const d = rest.slice(); let idx = 0;
+    const draw = () => { const j = idx + Math.floor(Math.random()*(d.length-idx)); [d[idx],d[j]]=[d[j],d[idx]]; return d[idx++]; };
+    const b = board.slice(); while (b.length<5) b.push(draw());
+    const my = best7(hole.concat(b)).v;
+    let win = true, ties = 0;
+    for (let o=0;o<nOpp;o++){
+      const ov = best7([draw(),draw()].concat(b)).v;
+      if (ov>my){ win=false; break; }
+      if (ov===my) ties++;
+    }
+    if (win) score += 1/(ties+1);
+  }
+  return score/iters;
+}
+
+// ================== Состояние игры ==================
+const NAMES = ['Ты','Анна (бот)','Борис (бот)','Вика (бот)'];
+const START_STACK = 1000, START_SB = 10, BLIND_UP_EVERY = 10;
+let P=[], board=[], deck=[], dealer=-1, sb=START_SB, bb=START_SB*2, handNo=0;
+let curBet=0, minRaise=0, toAct=-1, street=0, handOver=true, gameEnded=false, runout=false;
+let sbPos=-1, bbPos=-1, winners=new Set(), winKeys=new Set(), lastPot=0;
+let delay = (fn, ms) => setTimeout(fn, ms);
+let ALL_BOTS = false; // для автотеста
+
+const N = () => P.length;
+const canAct = p => !p.out && !p.folded && !p.allin;
+const potSize = () => P.reduce((s,p)=>s+p.total,0);
+function nextAlive(i){ for(let k=1;k<=N();k++){ const j=(i+k+N())%N(); if(!P[j].out) return j; } return -1; }
+function nextCanAct(i){ for(let k=1;k<=N();k++){ const j=(i+k+N())%N(); if(canAct(P[j])) return j; } return -1; }
+function isBot(i){ return ALL_BOTS || P[i].bot; }
+
+function put(i, amt){
+  const p=P[i]; const a=Math.max(0,Math.min(amt,p.stack));
+  p.stack-=a; p.bet+=a; p.total+=a;
+  if (p.stack===0) p.allin=true;
+  return a;
+}
+
+function newGame(){
+  P = NAMES.map((n,i)=>({name:n, bot:i>0, stack:START_STACK, hand:[], folded:false, allin:false, out:false, bet:0, total:0, acted:false, last:'', result:''}));
+  dealer=-1; handNo=0; sb=START_SB; bb=START_SB*2; gameEnded=false; gameMsg='';
+  if (UI) document.getElementById('log').innerHTML='';
+  startHand();
+}
+
+function startHand(){
+  P.forEach(p=>{ if (p.stack<=0) p.out=true; });
+  if (P[0].out && !ALL_BOTS) return gameOver('Ты выбыл из игры 😔 Нажми «Новая игра»');
+  if (P.filter(p=>!p.out).length===1){
+    const w=P.find(p=>!p.out);
+    return gameOver(w===P[0] ? 'Ты обыграл всех ботов! 🏆' : `${w.name} забрал все фишки`);
+  }
+  handNo++;
+  if (handNo>1 && (handNo-1)%BLIND_UP_EVERY===0){ sb*=2; bb*=2; log(`Блайнды выросли: ${sb}/${bb}`,'h'); }
+  dealer = nextAlive(dealer);
+  P.forEach(p=>{ p.hand=[]; p.folded=p.out; p.allin=false; p.bet=0; p.total=0; p.acted=false; p.last=''; p.result=''; p.best=null; });
+  board=[]; deck=shuffle(newDeck()); winners=new Set(); winKeys=new Set();
+  handOver=false; street=0; runout=false;
+  const alive = P.filter(p=>!p.out).length;
+  if (alive===2){ sbPos=dealer; bbPos=nextAlive(dealer); }
+  else { sbPos=nextAlive(dealer); bbPos=nextAlive(sbPos); }
+  put(sbPos,sb); P[sbPos].last='SB '+P[sbPos].bet;
+  put(bbPos,bb); P[bbPos].last='BB '+P[bbPos].bet;
+  curBet=bb; minRaise=bb;
+  for (let r=0;r<2;r++) for (let k=1;k<=N();k++){ const j=(dealer+k)%N(); if(!P[j].out) P[j].hand.push(deck.pop()); }
+  log(`— Раздача #${handNo}. Дилер: ${P[dealer].name}. Блайнды ${sb}/${bb}`,'h');
+  toAct = bbPos;
+  advance();
+}
+
+function advance(){
+  const live = P.filter(p=>!p.out && !p.folded);
+  if (live.length===1) return winAll(live[0]);
+  const ca = P.filter(canAct);
+  const done = ca.length===0 || (ca.length===1 && ca[0].bet>=curBet) || ca.every(p=>p.acted && p.bet===curBet);
+  if (done){ toAct=-1; render(); delay(nextStreet, 600); return; }
+  toAct = nextCanAct(toAct);
+  render();
+  if (isBot(toAct)) { const me=toAct, h=handNo; delay(()=>{ if(toAct===me && handNo===h && !handOver) botMove(me); }, 750); }
+}
+
+function act(i, type, to){
+  if (handOver || toAct!==i) return;
+  const p=P[i]; const call=curBet-p.bet;
+  if (type==='fold'){ p.folded=true; p.last='Фолд'; log(`${p.name}: фолд`); }
+  else if (type==='call' || (type==='raise' && to<=curBet)){
+    if (call<=0){ p.last='Чек'; log(`${p.name}: чек`); }
+    else { const a=put(i,call); p.last = p.allin ? `Олл-ин ${p.bet}` : `Колл ${a}`; log(`${p.name}: ${p.allin?'олл-ин, колл':'колл'} ${a}`); }
+  } else {
+    to = Math.min(to, p.bet+p.stack);
+    const prev=curBet; put(i, to-p.bet);
+    if (p.bet>prev){
+      const inc=p.bet-prev; if (inc>=minRaise) minRaise=inc;
+      curBet=p.bet;
+      P.forEach((q,j)=>{ if (j!==i && canAct(q)) q.acted=false; });
+    }
+    const word = prev===0 ? 'бет' : 'рейз до';
+    p.last = p.allin ? `Олл-ин ${p.bet}` : `${prev===0?'Бет':'Рейз до'} ${p.bet}`;
+    log(`${p.name}: ${p.allin?'олл-ин':word} ${p.bet}`);
+  }
+  p.acted=true;
+  advance();
+}
+
+function nextStreet(){
+  if (handOver) return;
+  P.forEach(p=>{ p.bet=0; p.acted=false; if (canAct(p)) p.last=''; });
+  curBet=0; minRaise=bb;
+  if (street===3) return showdown();
+  street++;
+  deck.pop(); // сжигаем карту
+  if (street===1) board.push(deck.pop(),deck.pop(),deck.pop()); else board.push(deck.pop());
+  log(`${['','Флоп','Тёрн','Ривер'][street]}: ${board.map(cs).join(' ')}`,'h');
+  if (P.filter(canAct).length<=1){ runout=true; render(); delay(nextStreet, 1100); return; }
+  toAct = dealer;
+  advance();
+}
+
+function winAll(p){
+  const pot=potSize(); lastPot=pot;
+  p.stack+=pot; winners.add(P.indexOf(p)); p.result=`+${pot}`;
+  log(`${p.name} забирает банк ${pot} (все сбросили)`,'h');
+  endHand();
+}
+
+function showdown(){
+  street=4; lastPot=potSize();
+  const live=P.filter(p=>!p.out && !p.folded);
+  live.forEach(p=>{ p.best=best7(p.hand.concat(board)); });
+  const levels=[...new Set(P.map(p=>p.total).filter(x=>x>0))].sort((a,b)=>a-b);
+  const won=P.map(()=>0); let prev=0;
+  for (const L of levels){
+    let amt=0; P.forEach(p=>{ amt += Math.min(p.total,L)-Math.min(p.total,prev); });
+    let elig=live.filter(p=>p.total>=L); if (!elig.length) elig=live;
+    const bv=Math.max(...elig.map(p=>p.best.v));
+    const w=elig.filter(p=>p.best.v===bv);
+    const share=Math.floor(amt/w.length); let rem=amt-share*w.length;
+    // нечётная фишка — первому после дилера
+    w.sort((a,b)=>((P.indexOf(a)-dealer-1+N())%N())-((P.indexOf(b)-dealer-1+N())%N()));
+    w.forEach(p=>{ const j=P.indexOf(p); won[j]+=share+(rem>0?1:0); if(rem>0) rem--; });
+    prev=L;
+  }
+  live.forEach(p=>log(`${p.name}: ${p.hand.map(cs).join(' ')} — ${handName(p.best)}`));
+  let top=null;
+  P.forEach((p,j)=>{
+    if (won[j]>0){
+      p.stack+=won[j];
+      const net=won[j]-p.total;
+      if (net>0 || live.length>1 && net>=0){ winners.add(j); }
+      p.result = net>0 ? `+${net} · ${handName(p.best)}` : (net===0 ? `возврат · ${handName(p.best)}` : `${handName(p.best)}`);
+      if (!top || p.best.v>top.best.v) top=p;
+      log(`${p.name} получает ${won[j]}`,'h');
+    } else if (!p.folded && !p.out){ p.result=handName(p.best); }
+  });
+  if (top) top.best.cards.forEach(c=>winKeys.add(key(c)));
+  endHand();
+}
+
+function endHand(){
+  handOver=true; toAct=-1;
+  if (ALL_BOTS) { checkChips(); return; }
+  render();
+}
+
+let gameMsg='';
+function gameOver(msg){
+  handOver=true; gameEnded=true; toAct=-1; gameMsg=msg;
+  if (UI) render();
+}
+
+// ================== Боты ==================
+function botMove(i){
+  const p=P[i];
+  const nOpp=P.filter((q,j)=>j!==i && !q.out && !q.folded).length;
+  const eq=equity(p.hand, board, nOpp, ALL_BOTS?60:260);
+  const call=Math.min(curBet-p.bet, p.stack);
+  const pot=potSize();
+  const r=Math.random();
+  const fair=1/(nOpp+1);
+  const othersCanAct=P.some((q,j)=>j!==i && canAct(q));
+  const raiseTo=f=>Math.min(curBet+Math.max(minRaise, Math.round(pot*f/bb)*bb), p.bet+p.stack);
+  if (call<=0){
+    if (othersCanAct && (eq>fair+(1-fair)*0.35 || (eq>fair*1.15 && r<0.3) || r<0.06)) return act(i,'raise',raiseTo(0.5+r*0.3));
+    return act(i,'call');
+  }
+  const potOdds=call/(pot+call);
+  if (othersCanAct && p.stack>call && (eq>fair+(1-fair)*0.5 && r<0.6 || r<0.03)) return act(i,'raise',raiseTo(0.6+r*0.4));
+  if (eq>=potOdds*0.9 || r<0.04) return act(i,'call');
+  return act(i,'fold');
+}
+
+// ================== Интерфейс ==================
+const $ = id => UI ? document.getElementById(id) : null;
+const POS = [{l:50,t:85},{l:11,t:46},{l:50,t:13},{l:89,t:46}];
+const hashCode = () => { const m = UI && location.hash.match(/^#p-([a-z0-9]{4,8})$/); return m ? m[1] : null; };
+let PHONE = false;          // этот экран — телефон игрока
+let phoneOn = false;        // (на столе) телефон подключён
+let roomCode = '';
+let pm = null, pmSeen = 0;  // (на телефоне) последнее состояние от стола
+let lastSent = '';
+
+function log(text, cls){
+  if (!UI) return;
+  const d=document.createElement('div'); d.textContent=text; if (cls) d.className=cls;
+  const L=$('log'); L.prepend(d); while (L.children.length>120) L.lastChild.remove();
+}
+
+function cardHTML(c, back, win){
+  if (!c) return '<div class="card empty"></div>';
+  if (back) return '<div class="card back"></div>';
+  const red = c.s===1 || c.s===2;
+  return `<div class="card${red?' red':''}${win?' win':''}"><span>${rn(c.r)}</span><span class="s">${SUITS[c.s]}</span></div>`;
+}
+
+// Всё, что нужно экрану игрока (и кнопкам на столе)
+function model(){
+  const me=P[0], myTurn=!handOver && toAct===0;
+  const call=Math.max(0,Math.min(curBet-me.bet, me.stack));
+  const maxTo=me.bet+me.stack;
+  const othersCanAct=P.some((q,j)=>j>0 && canAct(q));
+  let msg;
+  if (gameEnded) msg=gameMsg;
+  else if (handOver) msg = winners.has(0) ? 'Ты выиграл банк! 🎉' : 'Раздача окончена';
+  else if (myTurn) msg = call>0 ? `Твой ход. Чтобы остаться, нужно доставить ${call}` : 'Твой ход';
+  else msg = toAct>=0 ? `Ходит ${P[toAct].name}…` : '…';
+  const wk = street===4;
+  return {
+    h:handNo, s:street, cb:curBet, call, maxTo, minTo:Math.min(curBet+minRaise, maxTo),
+    canRaise: myTurn && othersCanAct && me.stack>call, myTurn, handOver, gameEnded, msg,
+    pot: handOver && lastPot ? lastPot : potSize(), sb, bb,
+    stack:me.stack, bet:me.bet, out:me.out, folded:me.folded, result:me.result||me.last,
+    dealer: dealer===0, win: winners.has(0),
+    hand: me.hand.map(c=>[c.r,c.s, wk && winKeys.has(key(c))?1:0]),
+    board: board.map(c=>[c.r,c.s, winKeys.has(key(c))?1:0]),
+    opp: P.slice(1).map((p,k)=>({n:p.name, st:p.stack, l:p.out?'Выбыл':(p.result||p.last), b:p.bet, f:p.folded||p.out, a:toAct===k+1 && !handOver, w:winners.has(k+1), d:dealer===k+1,
+      c: ((street===4||runout) && !p.folded && !p.out) ? p.hand.map(c=>[c.r,c.s]) : null }))
+  };
+}
+const toCard = a => ({r:a[0], s:a[1]});
+
+function render(){
+  if (!UI || !P.length) return;
+  const showAll=$('showAll').checked;
+  $('info').textContent = `Раздача #${handNo} · Блайнды ${sb}/${bb} · рост каждые ${BLIND_UP_EVERY} раздач`;
+  let bh=''; for (let i=0;i<5;i++) bh+=cardHTML(board[i], false, board[i] && winKeys.has(key(board[i])));
+  $('board').innerHTML=bh;
+  $('pot').textContent = 'Банк: ' + (handOver && lastPot ? lastPot : potSize());
+  let sh='';
+  P.forEach((p,i)=>{
+    // когда подключён телефон — твои карты на столе скрыты (до вскрытия)
+    const reveal = (i===0 && !phoneOn) || (i>0 && showAll) || ((street===4 || runout) && !p.folded);
+    const cls = ['seat', i===0?'me':'', p.folded&&!p.out?'folded':'', p.out?'out':'', i===toAct&&!handOver?'active':'', winners.has(i)?'winner':''].join(' ');
+    const cards = p.out ? '' : p.hand.map(c=>cardHTML(c, !reveal, winKeys.has(key(c)) && street===4)).join('');
+    const status = p.out ? 'Выбыл' : (p.result || p.last);
+    const nm = i===0 && phoneOn ? 'Ты 📱' : p.name;
+    sh += `<div class="${cls}" style="left:${POS[i].l}%;top:${POS[i].t}%">
+      ${i===0?'':`<div class="cards">${cards}</div>`}
+      <div class="box">
+        <div class="name">${nm}${i===dealer&&!p.out?'<span class="badge">D</span>':''}</div>
+        <div class="stack">${p.stack} фишек</div>
+        <div class="status">${status}</div>
+        ${p.bet>0?`<div class="chip">${p.bet}</div>`:''}
+      </div>
+      ${i===0?`<div class="cards" style="margin-top:6px">${cards}</div>`:''}
+    </div>`;
+  });
+  $('seats').innerHTML=sh;
+  const m=model();
+  renderControls(m, phoneOn);
+  syncPhone(false, m);
+}
+
+// Кнопки: на столе (если телефона нет) или на телефоне
+let cm=null;
+function renderControls(m, hidden){
+  cm=m;
+  const show = !hidden;
+  $('actRow').style.display = show && m.myTurn ? 'flex' : 'none';
+  $('raiseRow').style.display = 'none';
+  $('bNext').style.display = show && m.handOver && !m.gameEnded ? 'inline-block' : 'none';
+  $('msg').textContent = hidden ? (m.myTurn ? '📱 Твой ход — смотри телефон' : m.msg) : m.msg;
+  if (!show || !m.myTurn) return;
+  $('bCall').textContent = m.call<=0 ? 'Чек' : (m.call>=m.stack ? `Колл олл-ин ${m.call}` : `Колл ${m.call}`);
+  $('bRaise').style.display = m.canRaise ? 'inline-block' : 'none';
+  if (m.canRaise){
+    $('raiseRow').style.display='flex';
+    const rng=$('rng'), num=$('num'), tag=m.h+'-'+m.s+'-'+m.cb;
+    rng.min=m.minTo; rng.max=m.maxTo; rng.step=1; num.min=m.minTo; num.max=m.maxTo;
+    if (rng.dataset.tag!==tag){ rng.value=m.minTo; rng.dataset.tag=tag; }
+    num.value=rng.value; updRaiseLabel();
+  }
+}
+function raiseVal(){ let v=Math.round(+$('num').value||0); return Math.max(cm.minTo, Math.min(v, cm.maxTo)); }
+function updRaiseLabel(){
+  const v=raiseVal();
+  $('bRaise').textContent = v>=cm.maxTo ? `Олл-ин ${v}` : (cm.cb===0 ? `Бет ${v}` : `Рейз до ${v}`);
+}
+function doAction(type, to){
+  if (PHONE){
+    if (!pConn || !pConn.open || !cm) return;
+    try{ pConn.send({k:'act', a:{type, to:to||0, h:cm.h, s:cm.s, cb:cm.cb}}); }catch(e){ return; }
+    // сразу прячем кнопки, ждём ответа стола
+    $('actRow').style.display='none'; $('raiseRow').style.display='none'; $('bNext').style.display='none';
+    $('msg').textContent='Отправлено…';
+  } else {
+    if (type==='next') return startHand();
+    if (type==='new') return newGame();
+    act(0, type, to);
+  }
+}
+
+// ---------- Стол: связь с телефоном (PeerJS, напрямую между устройствами) ----------
+const PREFIX='hldm-tbl-';
+let peer=null, conns=[], tableTimer=null;
+function syncPhone(force, m){
+  if (PHONE || !conns.length) return;
+  m = m || model();
+  const s = JSON.stringify(m);
+  if (!force && s===lastSent) return;
+  lastSent = s;
+  conns.forEach(c=>{ if (c.open) try{ c.send({k:'st', m}); }catch(e){} });
+}
+function onPhoneAction(d){
+  if (!d || typeof d!=='object') return;
+  if (d.type==='new'){ if (gameEnded) newGame(); return; }
+  if (d.type==='next'){ if (handOver && !gameEnded && d.h===handNo) startHand(); return; }
+  if (!['fold','call','raise'].includes(d.type)) return;
+  if (handOver || toAct!==0 || d.h!==handNo || d.s!==street || d.cb!==curBet) { syncPhone(true); return; }
+  act(0, d.type, Math.round(+d.to||0));
+}
+function updPhoneOn(){
+  const now=Date.now();
+  conns = conns.filter(c=>{ if (c.open && now-c._seen<9000) return true; try{ c.close(); }catch(e){} return false; });
+  const was=phoneOn; phoneOn = conns.length>0;
+  if (was!==phoneOn){
+    setPhoneStatus(phoneOn ? '✅ Телефон подключён' : 'Ждём телефон…');
+    if (phoneOn) $('qrPanel').classList.remove('on');
+    render();
+  }
+}
+function initTable(){
+  if (!window.Peer) return setPhoneStatus('Не загрузилась библиотека связи (PeerJS). Проверь интернет и обнови страницу');
+  roomCode = Math.random().toString(36).slice(2,8).replace(/[^a-z0-9]/g,'a').padEnd(6,'x');
+  peer = new Peer(PREFIX+roomCode);
+  peer.on('open', ()=>{ drawQR(); setPhoneStatus(phoneOn ? '✅ Телефон подключён' : 'Ждём телефон…'); });
+  peer.on('connection', c=>{
+    c._seen=Date.now();
+    c.on('open', ()=>{ c._seen=Date.now(); conns.push(c); updPhoneOn(); syncPhone(true); });
+    c.on('data', d=>{ c._seen=Date.now(); if (d && d.k==='act') onPhoneAction(d.a); });
+    c.on('close', updPhoneOn);
+    c.on('error', updPhoneOn);
+  });
+  peer.on('disconnected', ()=>{ try{ peer.reconnect(); }catch(e){} });
+  peer.on('error', e=>{
+    if (e.type==='unavailable-id'){ try{ peer.destroy(); }catch(_){} initTable(); }
+    else if (!phoneOn) setPhoneStatus('Ошибка связи: '+e.type);
+  });
+  if (!tableTimer) tableTimer=setInterval(()=>{ updPhoneOn(); syncPhone(true); }, 2500);
+  setPhoneStatus('Соединяюсь с сервером…');
+}
+function setPhoneStatus(t){ if (UI) $('phoneStatus').textContent=t; }
+function drawQR(){
+  $('qr').innerHTML='';
+  if (!roomCode){ $('qrLink').textContent=''; return; }
+  if (location.protocol==='file:'){ $('qrLink').textContent='Страница открыта как файл с диска. Чтобы телефон подключился, открой её по ссылке GitHub Pages (https://…)'; return; }
+  const url = location.origin + location.pathname + '#p-' + roomCode;
+  $('qrLink').textContent = url;
+  if (window.QRCode) new QRCode($('qr'), {text:url, width:220, height:220, correctLevel:QRCode.CorrectLevel.M});
+  else $('qr').textContent='QR не загрузился — открой ссылку ниже на телефоне';
+}
+
+// ---------- Телефон ----------
+function renderPhone(){
+  const m=pm; if (!m) return;
+  $('info').textContent = `Раздача #${m.h} · Блайнды ${m.sb}/${m.bb}`;
+  $('pOpps').innerHTML = m.opp.map(o=>`<div class="opp${o.a?' active':''}${o.f?' folded':''}${o.w?' winner':''}">
+     <div class="name">${o.n}${o.d?'<span class="badge">D</span>':''}</div><div class="stack">${o.st}</div>
+     <div class="status">${o.l||''}${o.b>0?` · ${o.b}`:''}</div>
+     ${o.c?`<div class="cards" style="display:flex;gap:2px;justify-content:center">${o.c.map(a=>cardHTML(toCard(a))).join('')}</div>`:''}
+   </div>`).join('');
+  let bh=''; for (let i=0;i<5;i++) bh+= m.board[i] ? cardHTML(toCard(m.board[i]),false,m.board[i][2]) : cardHTML(null);
+  $('pBoard').innerHTML=bh;
+  $('pPot').textContent='Банк: '+m.pot;
+  $('pHand').innerHTML = m.out ? '' : m.hand.map(a=>cardHTML(toCard(a),false,a[2])).join('');
+  $('pHand').style.opacity = m.folded && !m.out ? .4 : 1;
+  $('pStack').innerHTML = `${m.stack} фишек${m.bet>0?` · ставка ${m.bet}`:''}${m.dealer?' <span class="badge">D</span>':''}`;
+  $('pResult').textContent = m.result||'';
+  renderControls(m, false);
+  if (m.gameEnded){ $('bNext').style.display='inline-block'; $('bNext').textContent='Новая игра'; }
+  else $('bNext').textContent='Следующая раздача';
+}
+let pPeer=null, pConn=null, pErr='', pTry=0;
+function phoneConnect(code){
+  if (pConn) try{ pConn.close(); }catch(e){}
+  const c = pConn = pPeer.connect(PREFIX+code, {reliable:true});
+  c.on('data', d=>{ if (c!==pConn) return; if (d && d.k==='st'){ pm=d.m; pmSeen=Date.now(); pErr=''; renderPhone(); } });
+}
+function initPhone(code){
+  PHONE=true; document.body.classList.add('phone');
+  $('bNew').style.display='none';
+  $('msg').textContent='Подключаюсь к столу…';
+  const conn = t => { $('pConn').textContent=t; };
+  if (!window.Peer){ conn('Не загрузилась библиотека связи (PeerJS). Проверь интернет и обнови страницу'); return; }
+  const start = ()=>{
+    if (pPeer) try{ pPeer.destroy(); }catch(e){}
+    pPeer = new Peer();
+    pPeer.on('open', ()=>phoneConnect(code));
+    pPeer.on('error', e=>{ pErr = e.type==='peer-unavailable' ? 'стол не найден — открой страницу стола и отсканируй QR заново' : e.type; });
+    pPeer.on('disconnected', ()=>{ try{ pPeer.reconnect(); }catch(e){} });
+    pTry=Date.now();
+  };
+  start();
+  const tick = ()=>{
+    if (pConn && pConn.open) try{ pConn.send({k:'hb'}); }catch(e){}
+    if (pmSeen && Date.now()-pmSeen<7000){ conn('✅ Подключено к столу'); return; }
+    conn((pmSeen ? '⚠️ Нет связи со столом, переподключаюсь…' : 'Подключаюсь к столу…') + (pErr ? ' ('+pErr+')' : ''));
+    if (Date.now()-pTry>6000){
+      pTry=Date.now();
+      if (pPeer.destroyed) start();
+      else if (pPeer.disconnected) { try{ pPeer.reconnect(); }catch(e){ start(); } }
+      else if (pPeer.open) phoneConnect(code);
+    }
+  };
+  setInterval(tick, 1500);
+  document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ pTry=0; tick(); } });
+}
+
+if (UI){
+  $('bFold').onclick = ()=>doAction('fold');
+  $('bCall').onclick = ()=>doAction('call');
+  $('bRaise').onclick = ()=>doAction('raise', raiseVal());
+  $('bNext').onclick = ()=>doAction(PHONE && pm && pm.gameEnded ? 'new' : 'next');
+  $('rng').oninput = ()=>{ $('num').value=$('rng').value; updRaiseLabel(); };
+  $('num').oninput = ()=>{ $('rng').value=$('num').value; updRaiseLabel(); };
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
+    const f=b.dataset.p; let v;
+    if (f==='all') v=cm.maxTo;
+    else v=cm.cb+Math.round(+f*(cm.pot+cm.call));
+    v=Math.max(cm.minTo, Math.min(v, cm.maxTo));
+    $('num').value=v; $('rng').value=v; updRaiseLabel();
+  });
+  $('bNew').onclick = ()=>newGame();
+  $('showAll').onchange = render;
+  $('bPhone').onclick = ()=>{ $('qrPanel').classList.add('on'); drawQR(); };
+  $('bQrClose').onclick = ()=>$('qrPanel').classList.remove('on');
+  const code = hashCode();
+  if (code) initPhone(code);
+  else { newGame(); initTable(); }
+}
+// для автотеста в node
+function checkChips(){ const s=P.reduce((a,p)=>a+p.stack,0); if (s!==START_STACK*N()) throw new Error('Фишки не сходятся: '+s); }
+if (!UI && typeof module!=='undefined') module.exports = { eval5, best7, handName, equity, setup:(d)=>{ delay=d; ALL_BOTS=true; }, newGame, startHand, state:()=>({P,handOver,handNo}) };
+</script>
+</body>
+</html>
