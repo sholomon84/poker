@@ -94,7 +94,7 @@ body.phone #controls button{padding:14px 18px;font-size:17px}
 
 <div id="qrPanel">
   <div class="qrBox">
-    <div style="font-weight:700;margin-bottom:6px">Отсканируй камерой телефона</div>
+    <div style="font-weight:700;margin-bottom:6px">Отсканируй камерой телефона, потом нажми «Начать игру»</div>
     <div id="qr"></div>
     <div class="qrHint">Телефон и стол — в одной сети Wi-Fi. Ничего устанавливать не нужно</div>
     <div class="qrLink" id="qrLink"></div>
@@ -500,8 +500,9 @@ function updRaiseLabel(){
 }
 function doAction(type, to){
   if (PHONE){
-    if (!pClient || !pClient.connected || !cm) return;
-    pClient.publish(TOPIC(window._pcode)+'/up', JSON.stringify({k:'act', a:{type, to:to||0, h:cm.h, s:cm.s, cb:cm.cb}}));
+    if (!pClient || !pClient.connected || (!cm && type!=='start')) return;
+    const c=cm||{};
+    pClient.publish(TOPIC(window._pcode)+'/up', JSON.stringify({k:'act', a:{type, to:to||0, h:c.h, s:c.s, cb:c.cb}}));
     // сразу прячем кнопки, ждём ответа стола
     $('actRow').style.display='none'; $('raiseRow').style.display='none'; $('bNext').style.display='none';
     $('msg').textContent='Отправлено…';
@@ -530,7 +531,7 @@ function mqttConnect(i, onOk, onFail){
 }
 function syncPhone(force, m){
   if (PHONE || !tClient || !tClient.connected || (!phoneOn && !force)) return;
-  m = m || model();
+  m = m || (P.length ? model() : {pre:true});
   const s = JSON.stringify(m);
   if (!force && s===lastSent) return;
   lastSent = s;
@@ -538,17 +539,21 @@ function syncPhone(force, m){
 }
 function onPhoneAction(d){
   if (!d || typeof d!=='object') return;
+  if (d.type==='start'){ startIfNeeded(); return; }
   if (d.type==='new'){ if (gameEnded) newGame(); return; }
   if (d.type==='next'){ if (handOver && !gameEnded && d.h===handNo) startHand(); return; }
   if (!['fold','call','raise'].includes(d.type)) return;
   if (handOver || toAct!==0 || d.h!==handNo || d.s!==street || d.cb!==curBet) { syncPhone(true); return; }
   act(0, d.type, Math.round(+d.to||0));
 }
+let gameStarted=false;
+function startIfNeeded(){ if (gameStarted) return; gameStarted=true; $('bQrClose').textContent='Закрыть'; $('bQrClose').style.background=''; $('qrPanel').classList.remove('on'); newGame(); }
 function updPhoneOn(){
   const was=phoneOn; phoneOn = Date.now()-phoneSeen < 8000;
   if (was!==phoneOn){
     setPhoneStatus(phoneOn ? '✅ Телефон подключён' : 'Ждём телефон…');
-    if (phoneOn) $('qrPanel').classList.remove('on');
+    if (phoneOn && gameStarted) $('qrPanel').classList.remove('on');
+    if (!gameStarted) syncPhone(true);
     render();
   }
 }
@@ -591,6 +596,12 @@ function drawQR(){
 // ---------- Телефон ----------
 function renderPhone(){
   const m=pm; if (!m) return;
+  if (m.pre){
+    ['actRow','raiseRow'].forEach(id=>$(id).style.display='none');
+    $('msg').textContent='Телефон подключён к столу';
+    $('bNext').textContent='▶ Начать игру'; $('bNext').style.display='inline-block';
+    return;
+  }
   $('info').textContent = `Раздача #${m.h} · Блайнды ${m.sb}/${m.bb}`;
   $('pOpps').innerHTML = m.opp.map(o=>`<div class="opp${o.a?' active':''}${o.f?' folded':''}${o.w?' winner':''}">
      <div class="name">${o.n}${o.d?'<span class="badge">D</span>':''}</div><div class="stack">${o.st}</div>
@@ -640,7 +651,7 @@ if (UI){
   $('bFold').onclick = ()=>doAction('fold');
   $('bCall').onclick = ()=>doAction('call');
   $('bRaise').onclick = ()=>doAction('raise', raiseVal());
-  $('bNext').onclick = ()=>doAction(PHONE && pm && pm.gameEnded ? 'new' : 'next');
+  $('bNext').onclick = ()=>doAction(PHONE && pm && pm.pre ? 'start' : (PHONE && pm && pm.gameEnded ? 'new' : 'next'));
   $('rng').oninput = ()=>{ $('num').value=$('rng').value; updRaiseLabel(); };
   $('num').oninput = ()=>{ $('rng').value=$('num').value; updRaiseLabel(); };
   document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
@@ -653,10 +664,10 @@ if (UI){
   $('bNew').onclick = ()=>newGame();
   $('showAll').onchange = render;
   $('bPhone').onclick = ()=>{ $('qrPanel').classList.add('on'); drawQR(); };
-  $('bQrClose').onclick = ()=>$('qrPanel').classList.remove('on');
+  $('bQrClose').onclick = ()=>{ $('qrPanel').classList.remove('on'); startIfNeeded(); };
   const code = hashCode();
   if (code) initPhone(code.c, code.b);
-  else { newGame(); initTable(); }
+  else { $('qrPanel').classList.add('on'); $('bQrClose').textContent='▶ Начать игру'; $('bQrClose').style.background='#2f8a4a'; initTable(); }
 }
 // для автотеста в node
 function checkChips(){ const s=P.reduce((a,p)=>a+p.stack,0); if (s!==START_STACK*N()) throw new Error('Фишки не сходятся: '+s); }
