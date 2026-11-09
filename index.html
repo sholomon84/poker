@@ -54,7 +54,11 @@ button:disabled{opacity:.4;cursor:default;filter:none}
 .card.hint{outline:3px solid #5ab0ff;transform:translateY(-3px)}
 .hintTxt{font-size:16px;font-weight:600;margin-top:4px;min-height:0}
 #pCombo{color:#9fd3ff}
-#hintRow{margin:14px 0 20px}
+#hintRow{margin:8px 0 20px}
+#viewRow{margin:14px 0 0}
+#pHand{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
+.pMe.concealed .hintTxt{visibility:hidden}
+body.noTable #pOpps, body.noTable .pTable{display:none}
 .tog{background:#26322c;color:#9fb5a9}
 .tog.on{background:#2b6b9a;color:#fff}
 #qrPanel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10;align-items:center;justify-content:center}
@@ -117,12 +121,14 @@ body.phone #controls button{padding:14px 18px;font-size:17px}
   </div>
   <div class="pMe">
     <div class="cards" id="pHand"></div>
+    <div id="peekHint" class="qrHint" style="display:none">Прижми карты пальцем, чтобы посмотреть</div>
     <div id="pStack" class="pStack"></div>
     <div id="pResult" class="status"></div>
     <div id="pCombo" class="hintTxt"></div>
     <div id="pEq" class="hintTxt"></div>
   </div>
   <div id="pConn" class="qrHint"></div>
+  <div class="row" id="viewRow"><span class="qrHint">Экран:</span><button class="small tog" id="tHideCards">🙈 Скрыть карты</button><button class="small tog" id="tHideTable">🟩 Скрыть стол</button></div>
   <div class="row" id="hintRow"><span class="qrHint">Подсказки:</span><button class="small tog" id="tCombo">🃏 Комбинация</button><button class="small tog" id="tEq">📊 Шанс</button></div>
 </div>
 
@@ -617,11 +623,14 @@ function renderPhone(){
      <div class="status">${o.l||''}${o.b>0?` · ${o.b}`:''}</div>
      ${o.c?`<div class="cards" style="display:flex;gap:2px;justify-content:center">${o.c.map(a=>cardHTML(toCard(a))).join('')}</div>`:''}
    </div>`).join('');
-  const hk=renderHints(m);
+  const conceal = VIEW.cards && !peek && !m.out && m.s!==4;
+  document.querySelector('.pMe').classList.toggle('concealed', conceal);
+  $('peekHint').style.display = conceal ? 'block' : 'none';
+  const hk = conceal ? new Set() : renderHints(m);
   let bh=''; for (let i=0;i<5;i++) bh+= m.board[i] ? cardHTML(toCard(m.board[i]),false,m.board[i][2],hk.has(key(toCard(m.board[i])))) : cardHTML(null);
   $('pBoard').innerHTML=bh;
   $('pPot').textContent='Банк: '+m.pot;
-  $('pHand').innerHTML = m.out ? '' : m.hand.map(a=>cardHTML(toCard(a),false,a[2],hk.has(key(toCard(a))))).join('');
+  $('pHand').innerHTML = m.out ? '' : m.hand.map(a=>cardHTML(toCard(a),conceal,a[2],hk.has(key(toCard(a))))).join('');
   $('pHand').style.opacity = m.folded && !m.out ? .4 : 1;
   $('pStack').innerHTML = `${m.stack} фишек${m.bet>0?` · ставка ${m.bet}`:''}${m.dealer?' <span class="badge">D</span>':''}`;
   $('pResult').textContent = m.result||'';
@@ -672,11 +681,16 @@ function describeHand(hole, board){
   return {text, keys};
 }
 const HINT={combo:false, eq:false};
+const VIEW={cards:false, table:false}; let peek=false;
+try{ VIEW.cards=localStorage.getItem('hp_hcards')==='1'; VIEW.table=localStorage.getItem('hp_htable')==='1'; }catch(e){}
 try{ HINT.combo=localStorage.getItem('hp_combo')==='1'; HINT.eq=localStorage.getItem('hp_eq')==='1'; }catch(e){}
 function paintToggles(){
   if (!UI) return;
   $('tCombo').classList.toggle('on', HINT.combo);
   $('tEq').classList.toggle('on', HINT.eq);
+  $('tHideCards').classList.toggle('on', VIEW.cards);
+  $('tHideTable').classList.toggle('on', VIEW.table);
+  document.body.classList.toggle('noTable', VIEW.table);
 }
 let eqCache={k:'', v:null};
 function showEq(hole, board, nOpp){
@@ -753,6 +767,16 @@ if (UI){
   const tog=(k,ls)=>{ HINT[k]=!HINT[k]; try{ localStorage.setItem(ls, HINT[k]?'1':'0'); }catch(e){} paintToggles(); if (pm && !pm.pre) renderPhone(); };
   $('tCombo').onclick=()=>tog('combo','hp_combo');
   $('tEq').onclick=()=>tog('eq','hp_eq');
+  const vtog=(k,ls)=>{ VIEW[k]=!VIEW[k]; try{ localStorage.setItem(ls, VIEW[k]?'1':'0'); }catch(e){} paintToggles(); if (pm && !pm.pre) renderPhone(); };
+  $('tHideCards').onclick=()=>vtog('cards','hp_hcards');
+  $('tHideTable').onclick=()=>vtog('table','hp_htable');
+  const ph=$('pHand');
+  const peekOn=e=>{ if (!VIEW.cards) return; e.preventDefault(); peek=true; if (pm && !pm.pre) renderPhone(); };
+  const peekOff=()=>{ if (!peek) return; peek=false; if (pm && !pm.pre) renderPhone(); };
+  ph.addEventListener('pointerdown', peekOn);
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>ph.addEventListener(ev, peekOff));
+  window.addEventListener('pointerup', peekOff);
+  ph.addEventListener('contextmenu', e=>e.preventDefault());
   paintToggles();
   $('showAll').onchange = render;
   $('bPhone').onclick = ()=>{ $('qrPanel').classList.add('on'); drawQR(); };
