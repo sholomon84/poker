@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Техасский холдем — стол и телефон</title>
+<title>Техасский холдем — стол и телефоны</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#0d1712;color:#eee;display:flex;flex-direction:column;align-items:center;min-height:100vh}
-header{width:100%;max-width:920px;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-size:14px;gap:10px;flex-wrap:wrap}
+header{width:100%;max-width:980px;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-size:14px;gap:10px;flex-wrap:wrap}
 header .info{font-weight:600}
 header label{display:flex;gap:6px;align-items:center;cursor:pointer;user-select:none}
 button{font:inherit;cursor:pointer;border:none;border-radius:8px;padding:10px 16px;font-weight:600;color:#fff;background:#3a4a42}
 button:hover{filter:brightness(1.15)}
 button:disabled{opacity:.4;cursor:default;filter:none}
 .small{padding:6px 10px;font-size:13px}
-.table{position:relative;width:min(920px,98vw);height:clamp(430px,58vw,560px);margin:2px 0 6px}
-.felt{position:absolute;inset:9% 7%;border-radius:999px;background:radial-gradient(ellipse at center,#2f9160 0%,#1e6e43 60%,#134a2d 100%);border:12px solid #5b3b1f;box-shadow:inset 0 0 40px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.6)}
+.table{position:relative;width:min(980px,98vw);height:clamp(460px,60vw,600px);margin:2px 0 6px}
+.felt{position:absolute;inset:11% 8%;border-radius:999px;background:radial-gradient(ellipse at center,#2f9160 0%,#1e6e43 60%,#134a2d 100%);border:12px solid #5b3b1f;box-shadow:inset 0 0 40px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.6)}
 .center{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);text-align:center}
 .board{display:flex;gap:6px;justify-content:center}
 .pot{margin-top:10px;font-weight:700;background:rgba(0,0,0,.4);padding:5px 14px;border-radius:20px;display:inline-block}
@@ -25,12 +25,14 @@ button:disabled{opacity:.4;cursor:default;filter:none}
 .card.back{background:repeating-linear-gradient(45deg,#8b1e2b 0 6px,#a8323f 6px 12px);border:3px solid #fff}
 .card.empty{background:rgba(255,255,255,.07);box-shadow:none;border:1px dashed rgba(255,255,255,.25)}
 .card.win{outline:3px solid #ffd54a;transform:translateY(-4px)}
+.card.hint{outline:3px solid #5ab0ff;transform:translateY(-3px)}
 .seat{position:absolute;transform:translate(-50%,-50%);text-align:center;min-width:118px}
 .seat .box{background:rgba(0,0,0,.65);border:2px solid #333;border-radius:10px;padding:4px 10px;margin-top:4px}
 .seat.active .box{border-color:#ffd54a;box-shadow:0 0 14px #ffd54a}
 .seat.folded .cards{opacity:.35}
 .seat.out{opacity:.35}
 .seat.winner .box{border-color:#4cff8f;box-shadow:0 0 14px #4cff8f}
+.seat.offline .box{border-style:dashed;border-color:#c55}
 .seat .cards{display:flex;gap:4px;justify-content:center;min-height:66px}
 .seat.me .card{width:56px;height:80px;font-size:23px}
 .seat.me .card .s{font-size:27px}
@@ -39,20 +41,20 @@ button:disabled{opacity:.4;cursor:default;filter:none}
 .stack{font-size:13px;color:#bfe9cf}
 .status{font-size:12px;color:#ffd54a;min-height:15px}
 .chip{display:inline-block;margin-top:3px;background:#f3c237;color:#222;font-weight:800;font-size:12px;border-radius:12px;padding:1px 8px}
-#controls{width:min(920px,98vw);display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 8px}
+#controls{width:min(980px,98vw);display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 8px}
 #msg{min-height:22px;font-weight:600;text-align:center}
 .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
 #bFold{background:#9a2b2b}
 #bCall{background:#2b6b9a}
 #bRaise{background:#2f8a4a}
 #bNext{background:#c07a12}
+#bSkip{background:#6a4a8a}
 #rng{width:200px}
 #num{width:80px;padding:8px;border-radius:8px;border:1px solid #555;background:#1b2621;color:#fff;font:inherit}
-#log{width:min(920px,98vw);margin:10px 0 24px;padding:8px 12px;background:#111c17;border-radius:10px;font-size:13px;max-height:170px;overflow:auto;color:#b9c9c0}
+#log{width:min(980px,98vw);margin:10px 0 24px;padding:8px 12px;background:#111c17;border-radius:10px;font-size:13px;max-height:170px;overflow:auto;color:#b9c9c0}
 #log div{padding:1px 0}
 #log .h{color:#ffd54a;font-weight:600}
-.card.hint{outline:3px solid #5ab0ff;transform:translateY(-3px)}
-.hintTxt{font-size:16px;font-weight:600;margin-top:4px;min-height:0}
+.hintTxt{font-size:16px;font-weight:600;margin-top:4px}
 #pCombo{color:#9fd3ff}
 #hintRow{margin:8px 0 20px}
 #viewRow{margin:14px 0 0}
@@ -61,20 +63,29 @@ button:disabled{opacity:.4;cursor:default;filter:none}
 body.noTable #pOpps, body.noTable .pTable{display:none}
 .tog{background:#26322c;color:#9fb5a9}
 .tog.on{background:#2b6b9a;color:#fff}
-#qrPanel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10;align-items:center;justify-content:center}
+#qrPanel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:10;align-items:center;justify-content:center;overflow:auto}
 #qrPanel.on{display:flex}
-.qrBox{background:#18241e;border-radius:14px;padding:18px;text-align:center;max-width:92vw}
+.qrBox{background:#18241e;border-radius:14px;padding:18px 22px;text-align:center;max-width:94vw}
+.lobbyWrap{display:flex;gap:22px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
 #qr{background:#fff;padding:10px;border-radius:8px;display:inline-block;margin:6px 0}
 #qr img,#qr canvas{display:block}
 .qrHint{font-size:12px;color:#9fb5a9;margin:6px 0}
-.qrLink{font-size:11px;word-break:break-all;color:#cfe;margin:4px 0 8px}
+.qrLink{font-size:11px;word-break:break-all;color:#cfe;margin:4px 0 8px;max-width:260px}
+.lobbyList{min-width:230px;text-align:left}
+.lobbyList h3{margin:4px 0 8px;font-size:16px}
+.pl{background:#22302a;border-radius:8px;padding:7px 10px;margin:5px 0;font-weight:600;display:flex;justify-content:space-between;gap:10px}
+.pl .st{font-weight:400;font-size:12px;color:#9fb5a9}
+.botsSel button{padding:6px 12px;margin:2px;background:#26322c}
+.botsSel button.on{background:#2b6b9a}
+#bStart{background:#2f8a4a;font-size:17px;padding:12px 22px;margin-top:10px}
 #phoneView{display:none;width:100%;max-width:480px;padding:0 10px;text-align:center}
 body.phone #phoneView{display:block}
 body.phone #tableView, body.phone .tblOnly, body.phone #log{display:none}
 #pOpps{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:4px 0 10px}
-.opp{background:rgba(0,0,0,.45);border:2px solid #333;border-radius:8px;padding:4px 8px;font-size:12px;min-width:90px}
+.opp{background:rgba(0,0,0,.45);border:2px solid #333;border-radius:8px;padding:4px 8px;font-size:12px;min-width:86px}
 .opp.active{border-color:#ffd54a}
 .opp.folded{opacity:.45}
+.opp.winner{border-color:#4cff8f}
 .pTable{background:radial-gradient(ellipse at center,#2f9160,#1a5e39);border-radius:18px;padding:14px 6px;border:6px solid #5b3b1f}
 .pMe{margin:14px 0 6px}
 .pMe .cards{display:flex;gap:10px;justify-content:center}
@@ -82,54 +93,83 @@ body.phone #tableView, body.phone .tblOnly, body.phone #log{display:none}
 .pMe .card .s{font-size:44px}
 .pStack{font-weight:700;margin-top:8px}
 body.phone #controls button{padding:14px 18px;font-size:17px}
+#pJoin{display:none;margin:40px 0 20px}
+#pJoin input{font:inherit;font-size:20px;padding:12px;border-radius:10px;border:1px solid #555;background:#1b2621;color:#fff;width:240px;text-align:center}
+#pLobby{display:none;margin:20px 0}
+#pGame{display:none}
 @media (max-width:600px){
   .card{width:34px;height:50px;font-size:15px}
   .card .s{font-size:16px}
   .seat.me .card{width:48px;height:70px;font-size:20px}
-  .seat{min-width:88px}
+  .seat{min-width:84px}
   .seat .box{padding:3px 6px}
   .name{font-size:12px}
   .seat .cards{min-height:50px}
-  .felt{inset:10% 3%}
+  .felt{inset:11% 3%}
 }
 </style>
 </head>
 <body>
 <header>
-  <div class="info" id="info">Раздача #0</div>
+  <div class="info" id="info">Холдем</div>
   <label class="tblOnly"><input type="checkbox" id="showAll"> Показать карты ботов</label>
-  <button class="small tblOnly" id="bPhone" style="background:#2b6b9a">📱 Подключить телефон</button>
-  <button class="small" id="bNew">Новая игра</button>
+  <button class="small tblOnly" id="bPhone" style="background:#2b6b9a">📱 QR и игроки</button>
+  <button class="small tblOnly" id="bNew">Новая игра</button>
 </header>
 
+<!-- Лобби стола: QR + список игроков -->
 <div id="qrPanel">
   <div class="qrBox">
-    <div style="font-weight:700;margin-bottom:6px">Отсканируй камерой телефона, потом нажми «Начать игру»</div>
-    <div id="qr"></div>
-    <div class="qrHint">Телефон и стол — в одной сети Wi-Fi. Ничего устанавливать не нужно</div>
-    <div class="qrLink" id="qrLink"></div>
-    <div id="phoneStatus" class="qrHint"></div>
-    <button class="small" id="bQrClose">Закрыть</button>
+    <div class="lobbyWrap">
+      <div>
+        <div style="font-weight:700;margin-bottom:6px">Сканируйте камерой телефона</div>
+        <div id="qr"></div>
+        <div class="qrLink" id="qrLink"></div>
+        <div id="phoneStatus" class="qrHint"></div>
+      </div>
+      <div class="lobbyList">
+        <h3 id="lobbyTitle">Игроки</h3>
+        <div id="lobbyPlayers"></div>
+        <div class="qrHint" style="margin-top:12px">Боты на свободные места:</div>
+        <div class="botsSel" id="botsSel"></div>
+        <div class="qrHint" id="lobbyNote"></div>
+        <div style="text-align:center">
+          <button id="bStart">▶ Начать игру</button><br>
+          <button class="small" id="bQrClose" style="margin-top:10px">Закрыть</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
+<!-- Экран телефона -->
 <div id="phoneView">
-  <div id="pOpps"></div>
-  <div class="pTable">
-    <div class="board" id="pBoard"></div>
-    <div class="pot" id="pPot">Банк: 0</div>
+  <div id="pJoin">
+    <div style="font-size:20px;font-weight:700;margin-bottom:14px">Как тебя зовут?</div>
+    <input id="pName" maxlength="14" placeholder="Имя" autocomplete="off"><br>
+    <button id="bJoin" style="margin-top:14px;background:#2f8a4a;font-size:18px;padding:12px 26px">Сесть за стол</button>
   </div>
-  <div class="pMe">
-    <div class="cards" id="pHand"></div>
-    <div id="peekHint" class="qrHint" style="display:none">Прижми карты пальцем, чтобы посмотреть</div>
-    <div id="pStack" class="pStack"></div>
-    <div id="pResult" class="status"></div>
-    <div id="pCombo" class="hintTxt"></div>
-    <div id="pEq" class="hintTxt"></div>
+  <div id="pLobby">
+    <div style="font-size:18px;font-weight:700" id="pLobbyMe"></div>
+    <div class="qrHint">За столом:</div>
+    <div id="pLobbyList" class="lobbyList" style="margin:0 auto;max-width:300px"></div>
+    <button class="small" id="bRename" style="margin-top:10px">Сменить имя</button>
   </div>
-  <div id="pConn" class="qrHint"></div>
-  <div class="row" id="viewRow"><span class="qrHint">Экран:</span><button class="small tog" id="tHideCards">🙈 Скрыть карты</button><button class="small tog" id="tHideTable">🟩 Скрыть стол</button></div>
-  <div class="row" id="hintRow"><span class="qrHint">Подсказки:</span><button class="small tog" id="tCombo">🃏 Комбинация</button><button class="small tog" id="tEq">📊 Шанс</button></div>
+  <div id="pGame">
+    <div id="pOpps"></div>
+    <div class="pTable">
+      <div class="board" id="pBoard"></div>
+      <div class="pot" id="pPot">Банк: 0</div>
+    </div>
+    <div class="pMe">
+      <div class="cards" id="pHand"></div>
+      <div id="peekHint" class="qrHint" style="display:none">Прижми карты пальцем, чтобы посмотреть</div>
+      <div id="pStack" class="pStack"></div>
+      <div id="pResult" class="status"></div>
+      <div id="pCombo" class="hintTxt"></div>
+      <div id="pEq" class="hintTxt"></div>
+    </div>
+  </div>
 </div>
 
 <div class="table" id="tableView">
@@ -156,6 +196,12 @@ body.phone #controls button{padding:14px 18px;font-size:17px}
     <button class="small" data-p="all">Олл-ин</button>
   </div>
   <button id="bNext">Следующая раздача</button>
+  <button id="bSkip" style="display:none"></button>
+</div>
+<div id="pExtra" style="display:none;width:100%;max-width:480px;text-align:center">
+  <div id="pConn" class="qrHint"></div>
+  <div class="row" id="viewRow"><span class="qrHint">Экран:</span><button class="small tog" id="tHideCards">🙈 Скрыть карты</button><button class="small tog" id="tHideTable">🟩 Скрыть стол</button></div>
+  <div class="row" id="hintRow"><span class="qrHint">Подсказки:</span><button class="small tog" id="tCombo">🃏 Комбинация</button><button class="small tog" id="tEq">📊 Шанс</button></div>
 </div>
 <div id="log"></div>
 
@@ -210,7 +256,6 @@ function handName(b){
   if (b.cat===8 && Math.floor(b.v/15**4)%15===14) return 'Роял-флеш';
   return HN[b.cat];
 }
-// Монте-Карло: вероятность выиграть против nOpp случайных рук
 function equity(hole, board, nOpp, iters){
   const known = new Set([...hole,...board].map(key));
   const rest = newDeck().filter(c=>!known.has(key(c)));
@@ -232,10 +277,11 @@ function equity(hole, board, nOpp, iters){
 }
 
 // ================== Состояние игры ==================
-const NAMES = ['Ты','Анна (бот)','Борис (бот)','Вика (бот)'];
+const BOT_NAMES = ['Анна','Борис','Вика','Гоша','Даша'];
+const MAX_SEATS = 6;
 const START_STACK = 1000, START_SB = 10, BLIND_UP_EVERY = 10;
 let P=[], board=[], deck=[], dealer=-1, sb=START_SB, bb=START_SB*2, handNo=0;
-let curBet=0, minRaise=0, toAct=-1, street=0, handOver=true, gameEnded=false, runout=false;
+let curBet=0, minRaise=0, toAct=-1, street=0, handOver=true, gameEnded=false, runout=false, gameMsg='';
 let sbPos=-1, bbPos=-1, winners=new Set(), winKeys=new Set(), lastPot=0;
 let delay = (fn, ms) => setTimeout(fn, ms);
 let ALL_BOTS = false; // для автотеста
@@ -254,28 +300,33 @@ function put(i, amt){
   return a;
 }
 
-function newGame(){
-  P = NAMES.map((n,i)=>({name:n, bot:i>0, stack:START_STACK, hand:[], folded:false, allin:false, out:false, bet:0, total:0, acted:false, last:'', result:''}));
+// spec: [{name, bot, pid, local}]
+function newGame(spec){
+  if (!spec) spec=[{name:'Ты', local:true}, ...BOT_NAMES.slice(0,3).map(n=>({name:n+' (бот)', bot:true}))];
+  P = spec.map(s=>({name:s.name, bot:!!s.bot, pid:s.pid||null, local:!!s.local, stack:START_STACK, hand:[], folded:false, allin:false, out:false, bet:0, total:0, acted:false, last:'', result:''}));
   dealer=-1; handNo=0; sb=START_SB; bb=START_SB*2; gameEnded=false; gameMsg='';
-  if (UI) document.getElementById('log').innerHTML='';
+  if (UI) $('log').innerHTML='';
   startHand();
 }
 
 function startHand(){
   P.forEach(p=>{ if (p.stack<=0) p.out=true; });
-  if (P[0].out && !ALL_BOTS) return gameOver('Ты выбыл из игры 😔 Нажми «Новая игра»');
-  if (P.filter(p=>!p.out).length===1){
-    const w=P.find(p=>!p.out);
-    return gameOver(w===P[0] ? 'Ты обыграл всех ботов! 🏆' : `${w.name} забрал все фишки`);
+  const alive=P.filter(p=>!p.out);
+  const humans=P.filter(p=>!p.bot);
+  if (!ALL_BOTS && humans.length && !alive.some(p=>!p.bot)){
+    return gameOver(humans.length===1 && humans[0].local ? 'Ты выбыл из игры 😔' : 'Все игроки выбыли — победили боты 🤖');
+  }
+  if (alive.length===1){
+    const w=alive[0];
+    return gameOver(w.bot ? `${w.name} забрал все фишки` : `${w.local?'Ты обыграл всех':w.name+' забирает все фишки'}! 🏆`);
   }
   handNo++;
   if (handNo>1 && (handNo-1)%BLIND_UP_EVERY===0){ sb*=2; bb*=2; log(`Блайнды выросли: ${sb}/${bb}`,'h'); }
   dealer = nextAlive(dealer);
   P.forEach(p=>{ p.hand=[]; p.folded=p.out; p.allin=false; p.bet=0; p.total=0; p.acted=false; p.last=''; p.result=''; p.best=null; });
   board=[]; deck=shuffle(newDeck()); winners=new Set(); winKeys=new Set();
-  handOver=false; street=0; runout=false;
-  const alive = P.filter(p=>!p.out).length;
-  if (alive===2){ sbPos=dealer; bbPos=nextAlive(dealer); }
+  handOver=false; street=0; runout=false; lastPot=0;
+  if (alive.length===2){ sbPos=dealer; bbPos=nextAlive(dealer); }
   else { sbPos=nextAlive(dealer); bbPos=nextAlive(sbPos); }
   put(sbPos,sb); P[sbPos].last='SB '+P[sbPos].bet;
   put(bbPos,bb); P[bbPos].last='BB '+P[bbPos].bet;
@@ -312,9 +363,8 @@ function act(i, type, to){
       curBet=p.bet;
       P.forEach((q,j)=>{ if (j!==i && canAct(q)) q.acted=false; });
     }
-    const word = prev===0 ? 'бет' : 'рейз до';
     p.last = p.allin ? `Олл-ин ${p.bet}` : `${prev===0?'Бет':'Рейз до'} ${p.bet}`;
-    log(`${p.name}: ${p.allin?'олл-ин':word} ${p.bet}`);
+    log(`${p.name}: ${p.allin?'олл-ин':(prev===0?'бет':'рейз до')} ${p.bet}`);
   }
   p.acted=true;
   advance();
@@ -326,7 +376,7 @@ function nextStreet(){
   curBet=0; minRaise=bb;
   if (street===3) return showdown();
   street++;
-  deck.pop(); // сжигаем карту
+  deck.pop();
   if (street===1) board.push(deck.pop(),deck.pop(),deck.pop()); else board.push(deck.pop());
   log(`${['','Флоп','Тёрн','Ривер'][street]}: ${board.map(cs).join(' ')}`,'h');
   if (P.filter(canAct).length<=1){ runout=true; render(); delay(nextStreet, 1100); return; }
@@ -336,7 +386,7 @@ function nextStreet(){
 
 function winAll(p){
   const pot=potSize(); lastPot=pot;
-  p.stack+=pot; winners.add(P.indexOf(p)); p.result=`+${pot}`;
+  p.stack+=pot; winners.add(P.indexOf(p)); p.result=`+${pot - p.total}`;
   log(`${p.name} забирает банк ${pot} (все сбросили)`,'h');
   endHand();
 }
@@ -353,7 +403,6 @@ function showdown(){
     const bv=Math.max(...elig.map(p=>p.best.v));
     const w=elig.filter(p=>p.best.v===bv);
     const share=Math.floor(amt/w.length); let rem=amt-share*w.length;
-    // нечётная фишка — первому после дилера
     w.sort((a,b)=>((P.indexOf(a)-dealer-1+N())%N())-((P.indexOf(b)-dealer-1+N())%N()));
     w.forEach(p=>{ const j=P.indexOf(p); won[j]+=share+(rem>0?1:0); if(rem>0) rem--; });
     prev=L;
@@ -364,7 +413,7 @@ function showdown(){
     if (won[j]>0){
       p.stack+=won[j];
       const net=won[j]-p.total;
-      if (net>0 || live.length>1 && net>=0){ winners.add(j); }
+      if (net>0 || (live.length>1 && net>=0)) winners.add(j);
       p.result = net>0 ? `+${net} · ${handName(p.best)}` : (net===0 ? `возврат · ${handName(p.best)}` : `${handName(p.best)}`);
       if (!top || p.best.v>top.best.v) top=p;
       log(`${p.name} получает ${won[j]}`,'h');
@@ -380,10 +429,9 @@ function endHand(){
   render();
 }
 
-let gameMsg='';
 function gameOver(msg){
   handOver=true; gameEnded=true; toAct=-1; gameMsg=msg;
-  if (UI) render();
+  if (UI){ log(msg,'h'); render(); }
 }
 
 // ================== Боты ==================
@@ -402,102 +450,75 @@ function botMove(i){
     return act(i,'call');
   }
   const potOdds=call/(pot+call);
-  if (othersCanAct && p.stack>call && (eq>fair+(1-fair)*0.5 && r<0.6 || r<0.03)) return act(i,'raise',raiseTo(0.6+r*0.4));
+  if (othersCanAct && p.stack>call && ((eq>fair+(1-fair)*0.5 && r<0.6) || r<0.03)) return act(i,'raise',raiseTo(0.6+r*0.4));
   if (eq>=potOdds*0.9 || r<0.04) return act(i,'call');
   return act(i,'fold');
 }
 
-// ================== Интерфейс ==================
+// ================== Общий интерфейс ==================
 const $ = id => UI ? document.getElementById(id) : null;
-const POS = [{l:50,t:85},{l:11,t:46},{l:50,t:13},{l:89,t:46}];
-const hashCode = () => { const m = UI && location.hash.match(/^#p-([a-z0-9]{4,8})(?:-(\d))?$/); return m ? {c:m[1], b:+(m[2]||0)} : null; };
-let PHONE = false;          // этот экран — телефон игрока
-let phoneOn = false;        // (на столе) телефон подключён
-let roomCode = '';
-let pm = null, pmSeen = 0;  // (на телефоне) последнее состояние от стола
-let lastSent = '';
+const LAYOUTS = {
+  2:[[50,86],[50,13]],
+  3:[[50,86],[13,38],[87,38]],
+  4:[[50,86],[11,48],[50,12],[89,48]],
+  5:[[50,86],[11,62],[27,13],[73,13],[89,62]],
+  6:[[50,86],[11,68],[11,27],[50,12],[89,27],[89,68]],
+};
+let PHONE=false;
+const setHTML = (el, h) => { if (el._h!==h){ el._h=h; el.innerHTML=h; } };
+const esc = s => String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function log(text, cls){
   if (!UI) return;
   const d=document.createElement('div'); d.textContent=text; if (cls) d.className=cls;
-  const L=$('log'); L.prepend(d); while (L.children.length>120) L.lastChild.remove();
+  const L=$('log'); L.prepend(d); while (L.children.length>150) L.lastChild.remove();
 }
-
 function cardHTML(c, back, win, hint){
   if (!c) return '<div class="card empty"></div>';
   if (back) return '<div class="card back"></div>';
   const red = c.s===1 || c.s===2;
   return `<div class="card${red?' red':''}${win?' win':''}${hint&&!win?' hint':''}"><span>${rn(c.r)}</span><span class="s">${SUITS[c.s]}</span></div>`;
 }
+const toCard = a => ({r:a[0], s:a[1]});
 
-// Всё, что нужно экрану игрока (и кнопкам на столе)
-function model(){
-  const me=P[0], myTurn=!handOver && toAct===0;
+// Состояние для экрана игрока на месте i
+function model(i){
+  const me=P[i], myTurn=!handOver && toAct===i;
   const call=Math.max(0,Math.min(curBet-me.bet, me.stack));
   const maxTo=me.bet+me.stack;
-  const othersCanAct=P.some((q,j)=>j>0 && canAct(q));
+  const othersCanAct=P.some((q,j)=>j!==i && canAct(q));
   let msg;
   if (gameEnded) msg=gameMsg;
-  else if (handOver) msg = winners.has(0) ? 'Ты выиграл банк! 🎉' : 'Раздача окончена';
+  else if (handOver) msg = winners.has(i) ? 'Ты выиграл банк! 🎉' : 'Раздача окончена';
+  else if (me.out) msg = 'Ты выбыл — смотри, как играют другие';
   else if (myTurn) msg = call>0 ? `Твой ход. Чтобы остаться, нужно доставить ${call}` : 'Твой ход';
   else msg = toAct>=0 ? `Ходит ${P[toAct].name}…` : '…';
   const wk = street===4;
+  const opp=[];
+  for (let k=1;k<N();k++){
+    const j=(i+k)%N(), p=P[j];
+    opp.push({n:p.name, st:p.stack, l:p.out?'Выбыл':(p.result||p.last), b:p.bet, f:p.folded||p.out, a:toAct===j && !handOver, w:winners.has(j), d:dealer===j,
+      c: ((street===4||runout) && !p.folded && !p.out) ? p.hand.map(c=>[c.r,c.s]) : null});
+  }
   return {
     h:handNo, s:street, cb:curBet, call, maxTo, minTo:Math.min(curBet+minRaise, maxTo),
     canRaise: myTurn && othersCanAct && me.stack>call, myTurn, handOver, gameEnded, msg,
-    pot: handOver && lastPot ? lastPot : potSize(), sb, bb,
+    pot: handOver && lastPot ? lastPot : potSize(), sb, bb, name:me.name,
     stack:me.stack, bet:me.bet, out:me.out, folded:me.folded, result:me.result||me.last,
-    dealer: dealer===0, win: winners.has(0),
+    dealer: dealer===i, win: winners.has(i),
     hand: me.hand.map(c=>[c.r,c.s, wk && winKeys.has(key(c))?1:0]),
     board: board.map(c=>[c.r,c.s, winKeys.has(key(c))?1:0]),
-    opp: P.slice(1).map((p,k)=>({n:p.name, st:p.stack, l:p.out?'Выбыл':(p.result||p.last), b:p.bet, f:p.folded||p.out, a:toAct===k+1 && !handOver, w:winners.has(k+1), d:dealer===k+1,
-      c: ((street===4||runout) && !p.folded && !p.out) ? p.hand.map(c=>[c.r,c.s]) : null }))
+    opp
   };
 }
-const toCard = a => ({r:a[0], s:a[1]});
 
-function render(){
-  if (!UI || !P.length) return;
-  const showAll=$('showAll').checked;
-  $('info').textContent = `Раздача #${handNo} · Блайнды ${sb}/${bb} · рост каждые ${BLIND_UP_EVERY} раздач`;
-  let bh=''; for (let i=0;i<5;i++) bh+=cardHTML(board[i], false, board[i] && winKeys.has(key(board[i])));
-  $('board').innerHTML=bh;
-  $('pot').textContent = 'Банк: ' + (handOver && lastPot ? lastPot : potSize());
-  let sh='';
-  P.forEach((p,i)=>{
-    // когда подключён телефон — твои карты на столе скрыты (до вскрытия)
-    const reveal = (i===0 && !phoneOn) || (i>0 && showAll) || ((street===4 || runout) && !p.folded);
-    const cls = ['seat', i===0?'me':'', p.folded&&!p.out?'folded':'', p.out?'out':'', i===toAct&&!handOver?'active':'', winners.has(i)?'winner':''].join(' ');
-    const cards = p.out ? '' : p.hand.map(c=>cardHTML(c, !reveal, winKeys.has(key(c)) && street===4)).join('');
-    const status = p.out ? 'Выбыл' : (p.result || p.last);
-    const nm = i===0 && phoneOn ? 'Ты 📱' : p.name;
-    sh += `<div class="${cls}" style="left:${POS[i].l}%;top:${POS[i].t}%">
-      ${i===0?'':`<div class="cards">${cards}</div>`}
-      <div class="box">
-        <div class="name">${nm}${i===dealer&&!p.out?'<span class="badge">D</span>':''}</div>
-        <div class="stack">${p.stack} фишек</div>
-        <div class="status">${status}</div>
-        ${p.bet>0?`<div class="chip">${p.bet}</div>`:''}
-      </div>
-      ${i===0?`<div class="cards" style="margin-top:6px">${cards}</div>`:''}
-    </div>`;
-  });
-  $('seats').innerHTML=sh;
-  const m=model();
-  renderControls(m, phoneOn);
-  syncPhone(false, m);
-}
-
-// Кнопки: на столе (если телефона нет) или на телефоне
+// Кнопки хода (на столе для локального игрока или на телефоне)
 let cm=null;
-function renderControls(m, hidden){
+function renderControls(m, show){
   cm=m;
-  const show = !hidden;
-  $('actRow').style.display = show && m.myTurn ? 'flex' : 'none';
+  $('actRow').style.display = show && m && m.myTurn ? 'flex' : 'none';
   $('raiseRow').style.display = 'none';
-  $('bNext').style.display = show && m.handOver && !m.gameEnded ? 'inline-block' : 'none';
-  $('msg').textContent = hidden ? (m.myTurn ? '📱 Твой ход — смотри телефон' : m.msg) : m.msg;
-  if (!show || !m.myTurn) return;
+  if (!show || !m || !m.myTurn) return;
   $('bCall').textContent = m.call<=0 ? 'Чек' : (m.call>=m.stack ? `Колл олл-ин ${m.call}` : `Колл ${m.call}`);
   $('bRaise').style.display = m.canRaise ? 'inline-block' : 'none';
   if (m.canRaise){
@@ -514,28 +535,180 @@ function updRaiseLabel(){
   $('bRaise').textContent = v>=cm.maxTo ? `Олл-ин ${v}` : (cm.cb===0 ? `Бет ${v}` : `Рейз до ${v}`);
 }
 function doAction(type, to){
-  if (PHONE){
-    if (!pClient || !pClient.connected || (!cm && type!=='start')) return;
-    const c=cm||{};
-    pClient.publish(TOPIC(window._pcode)+'/up', JSON.stringify({k:'act', a:{type, to:to||0, h:c.h, s:c.s, cb:c.cb}}));
-    // сразу прячем кнопки, ждём ответа стола
-    $('actRow').style.display='none'; $('raiseRow').style.display='none'; $('bNext').style.display='none';
-    $('msg').textContent='Отправлено…';
-  } else {
-    if (type==='next') return startHand();
-    if (type==='new') return newGame();
-    act(0, type, to);
-  }
+  if (PHONE) return phoneSend(type, to);
+  if (type==='next') return startHand();
+  const i=P.findIndex(p=>p.local);
+  if (i>=0) act(i, type, to);
 }
 
-// ---------- Связь стол <-> телефон через публичные MQTT-серверы ----------
+// ================== СТОЛ ==================
 const BROKERS=[
   'wss://broker.emqx.io:8084/mqtt',
   'wss://broker.hivemq.com:8884/mqtt',
   'wss://test.mosquitto.org:8081/mqtt',
 ];
-const TOPIC = code => 'hldm-poker/v1/'+code;
-let tClient=null, tBroker=-1, phoneSeen=0, tableTimer=null;
+const TOPIC = code => 'hldm-poker/v2/'+code;
+let tClient=null, tBroker=-1, roomCode='', gameStarted=false, tableTimer=null;
+const seen = {};            // pid -> время последнего сообщения
+const lobby = [];           // [{pid, name}] — подключившиеся телефоны (до старта)
+let botsWanted = 2;
+try{ const b=+localStorage.getItem('hp_bots'); if (b>=0 && b<=5 && localStorage.getItem('hp_bots')!==null) botsWanted=b; }catch(e){}
+const online = pid => pid && Date.now()-(seen[pid]||0) < 8000;
+const lastSentTo = {};
+
+function render(){
+  if (!UI || PHONE) return;
+  if (!P.length){ $('info').textContent='Холдем — ждём игроков'; return; }
+  const showAll=$('showAll').checked;
+  $('info').textContent = `Раздача #${handNo} · Блайнды ${sb}/${bb} · рост каждые ${BLIND_UP_EVERY} раздач`;
+  let bh=''; for (let i=0;i<5;i++) bh+=cardHTML(board[i], false, board[i] && winKeys.has(key(board[i])));
+  setHTML($('board'), bh);
+  $('pot').textContent = 'Банк: ' + (handOver && lastPot ? lastPot : potSize());
+  const L=LAYOUTS[N()]||LAYOUTS[6];
+  let sh='';
+  P.forEach((p,i)=>{
+    const reveal = p.local || (p.bot && showAll) || ((street===4 || runout) && !p.folded);
+    const off = p.pid && !online(p.pid);
+    const cls = ['seat', i===0?'me':'', p.folded&&!p.out?'folded':'', p.out?'out':'', i===toAct&&!handOver?'active':'', winners.has(i)?'winner':'', off?'offline':''].join(' ');
+    const cards = p.out ? '' : p.hand.map(c=>cardHTML(c, !reveal, winKeys.has(key(c)) && street===4)).join('');
+    const status = p.out ? 'Выбыл' : (off ? '📵 нет связи' : (p.result || p.last));
+    const nm = esc(p.name) + (p.pid ? ' 📱' : '');
+    const [l,t]=L[i];
+    const below = t>70;
+    sh += `<div class="${cls}" style="left:${l}%;top:${t}%">
+      ${below?'':`<div class="cards">${cards}</div>`}
+      <div class="box">
+        <div class="name">${nm}${i===dealer&&!p.out?'<span class="badge">D</span>':''}</div>
+        <div class="stack">${p.stack} фишек</div>
+        <div class="status">${esc(status)}</div>
+        ${p.bet>0?`<div class="chip">${p.bet}</div>`:''}
+      </div>
+      ${below?`<div class="cards" style="margin-top:6px">${cards}</div>`:''}
+    </div>`;
+  });
+  setHTML($('seats'), sh);
+  renderTableControls();
+  syncPhones(false);
+}
+
+function renderTableControls(){
+  const li=P.findIndex(p=>p.local);
+  const m = li>=0 ? model(li) : null;
+  renderControls(m, li>=0);
+  $('bNext').style.display = handOver && !gameEnded ? 'inline-block' : 'none';
+  $('bNext').textContent = 'Следующая раздача';
+  let msg;
+  if (gameEnded) msg=gameMsg;
+  else if (handOver) msg = winners.size ? 'Выиграл: '+[...winners].map(j=>P[j].name).join(', ') : 'Раздача окончена';
+  else if (m && m.myTurn) msg=m.msg;
+  else if (toAct>=0) msg = P[toAct].pid ? `📱 Ходит ${P[toAct].name}` : `Ходит ${P[toAct].name}…`;
+  else msg='…';
+  $('msg').textContent=msg;
+  // если у игрока пропала связь — можно сходить за него со стола
+  const sk=$('bSkip');
+  if (!handOver && toAct>=0 && P[toAct].pid && !online(P[toAct].pid)){
+    const c=curBet-P[toAct].bet;
+    sk.style.display='inline-block';
+    sk.textContent = `⏭ ${c>0?'Фолд':'Чек'} за ${P[toAct].name} (нет связи)`;
+  } else sk.style.display='none';
+}
+
+// ---- Лобби ----
+function renderLobby(){
+  if (!UI || PHONE) return;
+  const now=Date.now();
+  for (let k=lobby.length-1;k>=0;k--) if (now-(seen[lobby[k].pid]||0)>15000) lobby.splice(k,1);
+  const humans = gameStarted ? P.filter(p=>!p.bot) : lobby;
+  $('lobbyTitle').textContent = gameStarted ? 'За столом' : `Игроки (${lobby.length})`;
+  let h = humans.map(p=>`<div class="pl"><span>📱 ${esc(p.name)}</span><span class="st">${online(p.pid)?'на связи':'📵 нет связи'}</span></div>`).join('');
+  if (!gameStarted && !lobby.length) h='<div class="qrHint">Пока никого. Отсканируйте QR телефонами.<br>Можно играть и без телефона — со стола против ботов.</div>';
+  setHTML($('lobbyPlayers'), h);
+  const maxBots = Math.max(0, MAX_SEATS - Math.max(lobby.length,1));
+  if (botsWanted>maxBots) botsWanted=maxBots;
+  let bs=''; for (let b=0;b<=Math.min(5,maxBots);b++) bs+=`<button class="${b===botsWanted?'on':''}" data-b="${b}">${b}</button>`;
+  setHTML($('botsSel'), gameStarted ? '' : bs);
+  $('botsSel').previousElementSibling.style.display = gameStarted ? 'none' : '';
+  const total = Math.max(lobby.length,1) + botsWanted;
+  const ok = total>=2;
+  $('bStart').style.display = gameStarted ? 'none' : '';
+  $('bStart').disabled = !ok;
+  $('lobbyNote').textContent = gameStarted ? 'Игра идёт. Если телефон отключился — отсканируйте QR им снова, он вернётся на своё место.'
+    : (!lobby.length ? `Без телефонов: ты за столом + ${botsWanted} бот(а)` : (ok ? `Всего за столом: ${total}` : 'Нужно минимум 2 участника — добавь бота'));
+  $('bQrClose').style.display = gameStarted ? '' : 'none';
+}
+function startGame(){
+  if (gameStarted) return;
+  const total = Math.max(lobby.length,1) + botsWanted;
+  if (total<2) return;
+  const spec = lobby.length ? lobby.map(p=>({name:p.name, pid:p.pid})) : [{name:'Ты', local:true}];
+  shuffle(BOT_NAMES.slice()).slice(0,botsWanted).forEach(n=>spec.push({name:n+' (бот)', bot:true}));
+  gameStarted=true;
+  $('qrPanel').classList.remove('on');
+  newGame(spec);
+  renderLobby();
+}
+function backToLobby(){
+  gameStarted=false; P=[]; toAct=-1; handOver=true; gameEnded=false;
+  setHTML($('seats'),''); setHTML($('board'),''); $('pot').textContent='Банк: 0'; $('msg').textContent='';
+  ['actRow','raiseRow','bNext','bSkip'].forEach(id=>$(id).style.display='none');
+  $('qrPanel').classList.add('on');
+  render(); renderLobby(); syncPhones(true);
+}
+
+// ---- Связь ----
+function publishTo(pid, obj){
+  if (!tClient || !tClient.connected) return;
+  tClient.publish(TOPIC(roomCode)+'/down/'+pid, JSON.stringify(obj));
+}
+function lobbyState(pid){
+  const me=lobby.find(p=>p.pid===pid);
+  return {pre:true, me: me?me.name:'', players: lobby.map(p=>p.name), bots: botsWanted, canStart: Math.max(lobby.length,1)+botsWanted>=2 && lobby.length>0};
+}
+function syncPhones(force){
+  if (PHONE || !tClient || !tClient.connected) return;
+  const targets = new Set();
+  if (!gameStarted) lobby.forEach(p=>targets.add(p.pid));
+  else P.forEach(p=>{ if (p.pid) targets.add(p.pid); });
+  targets.forEach(pid=>{
+    let obj;
+    if (!gameStarted) obj={k:'st', m:lobbyState(pid)};
+    else { const i=P.findIndex(p=>p.pid===pid); obj={k:'st', m:model(i)}; }
+    const s=JSON.stringify(obj);
+    if (!force && lastSentTo[pid]===s) return;
+    lastSentTo[pid]=s;
+    publishTo(pid, obj);
+  });
+}
+function onUp(d){
+  if (!d || typeof d!=='object' || typeof d.id!=='string' || d.id.length>40) return;
+  const pid=d.id, name=String(d.name||'').trim().slice(0,14) || 'Игрок';
+  const wasOnline = online(pid);
+  seen[pid]=Date.now();
+  if (!gameStarted){
+    const ex=lobby.find(p=>p.pid===pid);
+    if (ex){ if (ex.name!==name){ ex.name=name; } }
+    else if (lobby.length < MAX_SEATS) lobby.push({pid, name});
+    else { publishTo(pid, {k:'st', m:{full:true, msg:'За столом нет свободных мест'}}); return; }
+    renderLobby();
+    if (d.k==='act' && d.a && d.a.type==='start') startGame();
+    syncPhones(!wasOnline || d.k==='hello');
+    return;
+  }
+  const i=P.findIndex(p=>p.pid===pid);
+  if (i<0){ publishTo(pid, {k:'st', m:{full:true, msg:'Игра за этим столом уже идёт. Дождись новой игры'}}); return; }
+  if (!wasOnline){ render(); renderLobby(); }
+  if (d.k==='hello' || !wasOnline) { lastSentTo[pid]=''; }
+  if (d.k==='act') onPhoneAction(i, d.a);
+  syncPhones(false);
+}
+function onPhoneAction(i, a){
+  if (!a || typeof a!=='object') return;
+  if (a.type==='new'){ if (gameEnded) backToLobby(); return; }
+  if (a.type==='next'){ if (handOver && !gameEnded && a.h===handNo) startHand(); return; }
+  if (!['fold','call','raise'].includes(a.type)) return;
+  if (handOver || toAct!==i || a.h!==handNo || a.s!==street || a.cb!==curBet){ lastSentTo[P[i].pid]=''; syncPhones(false); return; }
+  act(i, a.type, Math.round(+a.to||0));
+}
 function mqttConnect(i, onOk, onFail){
   let done=false;
   const c = mqtt.connect(BROKERS[i], {clientId:'hp'+Math.random().toString(36).slice(2,10), connectTimeout:6000, reconnectPeriod:2000, keepalive:20, clean:true});
@@ -544,60 +717,29 @@ function mqttConnect(i, onOk, onFail){
   c.on('error', ()=>{});
   return c;
 }
-function syncPhone(force, m){
-  if (PHONE || !tClient || !tClient.connected || (!phoneOn && !force)) return;
-  m = m || (P.length ? model() : {pre:true});
-  const s = JSON.stringify(m);
-  if (!force && s===lastSent) return;
-  lastSent = s;
-  tClient.publish(TOPIC(roomCode)+'/down', JSON.stringify({k:'st', m}));
-}
-function onPhoneAction(d){
-  if (!d || typeof d!=='object') return;
-  if (d.type==='start'){ startIfNeeded(); return; }
-  if (d.type==='new'){ if (gameEnded) newGame(); return; }
-  if (d.type==='next'){ if (handOver && !gameEnded && d.h===handNo) startHand(); return; }
-  if (!['fold','call','raise'].includes(d.type)) return;
-  if (handOver || toAct!==0 || d.h!==handNo || d.s!==street || d.cb!==curBet) { syncPhone(true); return; }
-  act(0, d.type, Math.round(+d.to||0));
-}
-let gameStarted=false;
-function startIfNeeded(){ if (gameStarted) return; gameStarted=true; $('bQrClose').textContent='Закрыть'; $('bQrClose').style.background=''; $('qrPanel').classList.remove('on'); newGame(); }
-function updPhoneOn(){
-  const was=phoneOn; phoneOn = Date.now()-phoneSeen < 8000;
-  if (was!==phoneOn){
-    setPhoneStatus(phoneOn ? '✅ Телефон подключён' : 'Ждём телефон…');
-    if (phoneOn && gameStarted) $('qrPanel').classList.remove('on');
-    if (!gameStarted) syncPhone(true);
-    render();
-  }
-}
+function setPhoneStatus(t){ if (UI) $('phoneStatus').textContent=t; }
 function initTable(){
+  renderLobby();
   if (!window.mqtt) return setPhoneStatus('Не загрузилась библиотека связи. Проверь интернет и обнови страницу');
   roomCode = Math.random().toString(36).slice(2,8).replace(/[^a-z0-9]/g,'a').padEnd(6,'x');
   const tryB = i=>{
-    if (i>=BROKERS.length){ setPhoneStatus('❌ Ни один сервер связи не ответил. Проверь интернет и обнови страницу'); return; }
+    if (i>=BROKERS.length){ setPhoneStatus('❌ Ни один сервер связи не ответил. Можно играть без телефонов или обновить страницу'); return; }
     setPhoneStatus(`Соединяюсь с сервером ${i+1} из ${BROKERS.length}…`);
     mqttConnect(i, c=>{
       tClient=c; tBroker=i;
       const sub=()=>c.subscribe(TOPIC(roomCode)+'/up');
       sub(); c.on('connect', sub);
-      c.on('message', (topic, buf)=>{
-        let d; try{ d=JSON.parse(buf.toString()); }catch(e){ return; }
-        const first = !phoneOn;
-        phoneSeen=Date.now(); updPhoneOn();
-        if (first) syncPhone(true);
-        if (d.k==='act') onPhoneAction(d.a);
-        else if (d.k==='hello') syncPhone(true);
-      });
+      c.on('message', (topic, buf)=>{ let d; try{ d=JSON.parse(buf.toString()); }catch(e){ return; } onUp(d); });
       drawQR();
-      setPhoneStatus(phoneOn ? '✅ Телефон подключён' : `Ждём телефон… (сервер ${i+1})`);
+      setPhoneStatus(`✅ Связь есть (сервер ${i+1})`);
     }, ()=>tryB(i+1));
   };
   tryB(0);
-  if (!tableTimer) tableTimer=setInterval(()=>{ updPhoneOn(); if (phoneOn) syncPhone(true); }, 2500);
+  if (!tableTimer) tableTimer=setInterval(()=>{
+    if (gameStarted) render(); // обновить значки связи
+    renderLobby(); syncPhones(true);
+  }, 2500);
 }
-function setPhoneStatus(t){ if (UI) $('phoneStatus').textContent=t; }
 function drawQR(){
   $('qr').innerHTML='';
   if (!roomCode || tBroker<0){ $('qrLink').textContent='Подожди, подключаюсь к серверу…'; return; }
@@ -608,37 +750,7 @@ function drawQR(){
   else $('qr').textContent='QR не загрузился — открой ссылку ниже на телефоне';
 }
 
-// ---------- Телефон ----------
-function renderPhone(){
-  const m=pm; if (!m) return;
-  if (m.pre){
-    ['actRow','raiseRow'].forEach(id=>$(id).style.display='none');
-    $('msg').textContent='Телефон подключён к столу'; $('pCombo').textContent=''; $('pEq').textContent='';
-    $('bNext').textContent='▶ Начать игру'; $('bNext').style.display='inline-block';
-    return;
-  }
-  $('info').textContent = `Раздача #${m.h} · Блайнды ${m.sb}/${m.bb}`;
-  $('pOpps').innerHTML = m.opp.map(o=>`<div class="opp${o.a?' active':''}${o.f?' folded':''}${o.w?' winner':''}">
-     <div class="name">${o.n}${o.d?'<span class="badge">D</span>':''}</div><div class="stack">${o.st}</div>
-     <div class="status">${o.l||''}${o.b>0?` · ${o.b}`:''}</div>
-     ${o.c?`<div class="cards" style="display:flex;gap:2px;justify-content:center">${o.c.map(a=>cardHTML(toCard(a))).join('')}</div>`:''}
-   </div>`).join('');
-  const conceal = VIEW.cards && !peek && !m.out && m.s!==4;
-  document.querySelector('.pMe').classList.toggle('concealed', conceal);
-  $('peekHint').style.display = conceal ? 'block' : 'none';
-  const hk = conceal ? new Set() : renderHints(m);
-  let bh=''; for (let i=0;i<5;i++) bh+= m.board[i] ? cardHTML(toCard(m.board[i]),false,m.board[i][2],hk.has(key(toCard(m.board[i])))) : cardHTML(null);
-  $('pBoard').innerHTML=bh;
-  $('pPot').textContent='Банк: '+m.pot;
-  $('pHand').innerHTML = m.out ? '' : m.hand.map(a=>cardHTML(toCard(a),conceal,a[2],hk.has(key(toCard(a))))).join('');
-  $('pHand').style.opacity = m.folded && !m.out ? .4 : 1;
-  $('pStack').innerHTML = `${m.stack} фишек${m.bet>0?` · ставка ${m.bet}`:''}${m.dealer?' <span class="badge">D</span>':''}`;
-  $('pResult').textContent = m.result||'';
-  renderControls(m, false);
-  if (m.gameEnded){ $('bNext').style.display='inline-block'; $('bNext').textContent='Новая игра'; }
-  else $('bNext').textContent='Следующая раздача';
-}
-// ---------- Подсказки на телефоне ----------
+// ================== ТЕЛЕФОН ==================
 const R_GEN={2:'двоек',3:'троек',4:'четвёрок',5:'пятёрок',6:'шестёрок',7:'семёрок',8:'восьмёрок',9:'девяток',10:'десяток',11:'вальтов',12:'дам',13:'королей',14:'тузов'};
 const R_PL={2:'двойки',3:'тройки',4:'четвёрки',5:'пятёрки',6:'шестёрки',7:'семёрки',8:'восьмёрки',9:'девятки',10:'десятки',11:'вальты',12:'дамы',13:'короли',14:'тузы'};
 const R_ONE={2:'двойка',3:'тройка',4:'четвёрка',5:'пятёрка',6:'шестёрка',7:'семёрка',8:'восьмёрка',9:'девятка',10:'десятка',11:'валет',12:'дама',13:'король',14:'туз'};
@@ -682,8 +794,10 @@ function describeHand(hole, board){
 }
 const HINT={combo:false, eq:false};
 const VIEW={cards:false, table:false}; let peek=false;
-try{ VIEW.cards=localStorage.getItem('hp_hcards')==='1'; VIEW.table=localStorage.getItem('hp_htable')==='1'; }catch(e){}
-try{ HINT.combo=localStorage.getItem('hp_combo')==='1'; HINT.eq=localStorage.getItem('hp_eq')==='1'; }catch(e){}
+try{
+  HINT.combo=localStorage.getItem('hp_combo')==='1'; HINT.eq=localStorage.getItem('hp_eq')==='1';
+  VIEW.cards=localStorage.getItem('hp_hcards')==='1'; VIEW.table=localStorage.getItem('hp_htable')==='1';
+}catch(e){}
 function paintToggles(){
   if (!UI) return;
   $('tCombo').classList.toggle('on', HINT.combo);
@@ -700,10 +814,10 @@ function showEq(hole, board, nOpp){
     const p=Math.round(v*100);
     el.innerHTML=`Шанс на победу: <b style="color:${p>=50?'#4cff8f':p>=25?'#ffd54a':'#ff8a7a'}">${p}%</b>` + (nOpp>1?` <span style="opacity:.7">(против ${nOpp})</span>`:'');
   };
-  if (eqCache.k===k){ if (eqCache.v!=null) paint(eqCache.v); return; }
+  if (eqCache.k===k){ if (eqCache.v!=null) paint(eqCache.v); else el.textContent='Шанс на победу: считаю…'; return; }
   eqCache={k, v:null};
   el.textContent='Шанс на победу: считаю…';
-  setTimeout(()=>{ if (eqCache.k!==k) return; const v=equity(hole, board, nOpp, 800); eqCache.v=v; if (eqCache.k===k) paint(v); }, 30);
+  setTimeout(()=>{ if (eqCache.k!==k) return; const v=equity(hole, board, nOpp, 800); eqCache.v=v; if (eqCache.k===k && HINT.eq) paint(v); }, 30);
 }
 function renderHints(m){
   const hole=m.hand.map(toCard), board=m.board.map(toCard);
@@ -721,53 +835,126 @@ function renderHints(m){
   return keys;
 }
 
-let pClient=null;
+let pClient=null, pCode='', pm=null, pmSeen=0, myId='', myName='';
+function phoneShow(view){ ['pJoin','pLobby','pGame'].forEach(id=>$(id).style.display = id===view ? 'block':'none'); }
+function phoneSend(type, to){
+  if (!pClient || !pClient.connected) return;
+  if (type!=='start' && type!=='new' && !cm) return;
+  const c=cm||{};
+  pClient.publish(TOPIC(pCode)+'/up', JSON.stringify({k:'act', id:myId, name:myName, a:{type, to:to||0, h:c.h, s:c.s, cb:c.cb}}));
+  if (['fold','call','raise','next'].includes(type)){
+    $('actRow').style.display='none'; $('raiseRow').style.display='none'; $('bNext').style.display='none';
+    $('msg').textContent='Отправлено…';
+  }
+}
+function renderPhone(){
+  const m=pm;
+  if (!myName){ phoneShow('pJoin'); ['actRow','raiseRow','bNext'].forEach(id=>$(id).style.display='none'); $('msg').textContent=''; return; }
+  if (!m){ phoneShow(null); $('msg').textContent='Подключаюсь к столу…'; return; }
+  if (m.full){ phoneShow(null); ['actRow','raiseRow','bNext'].forEach(id=>$(id).style.display='none'); $('msg').textContent=m.msg; return; }
+  if (m.pre){
+    phoneShow('pLobby');
+    $('info').textContent='Холдем · ожидание игроков';
+    $('pLobbyMe').textContent = `Ты за столом как «${myName}»`;
+    setHTML($('pLobbyList'), m.players.map(n=>`<div class="pl"><span>📱 ${esc(n)}</span>${n===m.me?'<span class="st">это ты</span>':''}</div>`).join('') + (m.bots?`<div class="pl"><span>🤖 Ботов: ${m.bots}</span></div>`:''));
+    ['actRow','raiseRow'].forEach(id=>$(id).style.display='none');
+    $('msg').textContent = 'Ждём, пока все сядут за стол';
+    $('bNext').textContent='▶ Начать игру'; $('bNext').style.display='inline-block'; $('bNext').disabled=!m.canStart;
+    return;
+  }
+  $('bNext').disabled=false;
+  phoneShow('pGame');
+  $('info').textContent = `${m.name} · Раздача #${m.h} · Блайнды ${m.sb}/${m.bb}`;
+  setHTML($('pOpps'), m.opp.map(o=>`<div class="opp${o.a?' active':''}${o.f?' folded':''}${o.w?' winner':''}">
+     <div class="name">${esc(o.n)}${o.d?'<span class="badge">D</span>':''}</div><div class="stack">${o.st}</div>
+     <div class="status">${esc(o.l||'')}${o.b>0?` · ${o.b}`:''}</div>
+     ${o.c?`<div class="cards" style="display:flex;gap:2px;justify-content:center">${o.c.map(a=>cardHTML(toCard(a))).join('')}</div>`:''}
+   </div>`).join(''));
+  const conceal = VIEW.cards && !peek && !m.out && m.s!==4;
+  document.querySelector('.pMe').classList.toggle('concealed', conceal);
+  $('peekHint').style.display = conceal && m.hand.length ? 'block' : 'none';
+  const hk = conceal ? new Set() : renderHints(m);
+  let bh=''; for (let i=0;i<5;i++) bh+= m.board[i] ? cardHTML(toCard(m.board[i]),false,m.board[i][2],hk.has(key(toCard(m.board[i])))) : cardHTML(null);
+  setHTML($('pBoard'), bh);
+  $('pPot').textContent='Банк: '+m.pot;
+  setHTML($('pHand'), m.out ? '' : m.hand.map(a=>cardHTML(toCard(a),conceal,a[2],hk.has(key(toCard(a))))).join(''));
+  $('pHand').style.opacity = m.folded && !m.out ? .4 : 1;
+  $('pStack').innerHTML = `${m.stack} фишек${m.bet>0?` · ставка ${m.bet}`:''}${m.dealer?' <span class="badge">D</span>':''}`;
+  $('pResult').textContent = m.result||'';
+  renderControls(m, true);
+  $('msg').textContent = m.msg;
+  if (m.gameEnded){ $('bNext').style.display='inline-block'; $('bNext').textContent='Новая игра'; }
+  else { $('bNext').style.display = m.handOver ? 'inline-block' : 'none'; $('bNext').textContent='Следующая раздача'; }
+}
 function initPhone(code, bi){
   PHONE=true; document.body.classList.add('phone');
-  $('bNew').style.display='none';
-  ['actRow','raiseRow','bNext'].forEach(id=>$(id).style.display='none');
-  $('msg').textContent='Подключаюсь к столу…';
+  $('pExtra').style.display='block';
+  pCode=code;
+  try{ myId=localStorage.getItem('hp_id')||''; myName=localStorage.getItem('hp_name')||''; }catch(e){}
+  if (!myId){ myId='u'+Math.random().toString(36).slice(2,12); try{ localStorage.setItem('hp_id', myId); }catch(e){} }
+  $('pName').value=myName;
   const conn = t => { $('pConn').textContent=t; };
+  renderPhone();
   if (!window.mqtt){ conn('Не загрузилась библиотека связи. Проверь интернет и обнови страницу'); return; }
   if (!(bi>=0 && bi<BROKERS.length)) bi=0;
-  window._pcode=code;
   pClient = mqtt.connect(BROKERS[bi], {clientId:'hp'+Math.random().toString(36).slice(2,10), connectTimeout:8000, reconnectPeriod:2000, keepalive:20, clean:true});
-  pClient.on('connect', ()=>{
-    pClient.subscribe(TOPIC(code)+'/down');
-    pClient.publish(TOPIC(code)+'/up', JSON.stringify({k:'hello'}));
-  });
+  const hello=()=>{ if (myName && pClient.connected) pClient.publish(TOPIC(code)+'/up', JSON.stringify({k:'hello', id:myId, name:myName})); };
+  pClient.on('connect', ()=>{ pClient.subscribe(TOPIC(code)+'/down/'+myId); hello(); });
   pClient.on('message', (topic, buf)=>{
     let d; try{ d=JSON.parse(buf.toString()); }catch(e){ return; }
     if (d.k==='st'){ pm=d.m; pmSeen=Date.now(); renderPhone(); }
   });
   pClient.on('error', ()=>{});
+  window._hello=hello;
   setInterval(()=>{
-    if (pClient.connected) pClient.publish(TOPIC(code)+'/up', JSON.stringify({k:'hb'}));
-    if (pmSeen && Date.now()-pmSeen<7000) conn('✅ Подключено к столу');
+    if (myName && pClient.connected) pClient.publish(TOPIC(code)+'/up', JSON.stringify({k:'hb', id:myId, name:myName}));
+    if (!myName) conn('');
+    else if (pmSeen && Date.now()-pmSeen<7000) conn('✅ Подключено к столу');
     else if (!pClient.connected) conn(`Подключаюсь к серверу ${bi+1}…`);
     else conn(pmSeen ? '⚠️ Нет связи со столом…' : 'Сервер ✓, ждём стол… Если долго — отсканируй QR заново');
   }, 2000);
 }
+function phoneJoin(){
+  const n=$('pName').value.trim().slice(0,14);
+  if (!n){ $('pName').focus(); return; }
+  myName=n; try{ localStorage.setItem('hp_name', n); }catch(e){}
+  pm=null; renderPhone();
+  if (window._hello) window._hello();
+}
 
+// ================== Запуск ==================
 if (UI){
   $('bFold').onclick = ()=>doAction('fold');
   $('bCall').onclick = ()=>doAction('call');
   $('bRaise').onclick = ()=>doAction('raise', raiseVal());
-  $('bNext').onclick = ()=>doAction(PHONE && pm && pm.pre ? 'start' : (PHONE && pm && pm.gameEnded ? 'new' : 'next'));
+  $('bNext').onclick = ()=>{
+    if (PHONE){ if (pm && pm.pre) return phoneSend('start'); if (pm && pm.gameEnded) return phoneSend('new'); return phoneSend('next'); }
+    doAction('next');
+  };
+  $('bSkip').onclick = ()=>{ if (toAct>=0 && P[toAct].pid && !online(P[toAct].pid)) act(toAct, curBet-P[toAct].bet>0?'fold':'call'); };
   $('rng').oninput = ()=>{ $('num').value=$('rng').value; updRaiseLabel(); };
   $('num').oninput = ()=>{ $('rng').value=$('num').value; updRaiseLabel(); };
   document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
     const f=b.dataset.p; let v;
-    if (f==='all') v=cm.maxTo;
-    else v=cm.cb+Math.round(+f*(cm.pot+cm.call));
+    if (f==='all') v=cm.maxTo; else v=cm.cb+Math.round(+f*(cm.pot+cm.call));
     v=Math.max(cm.minTo, Math.min(v, cm.maxTo));
     $('num').value=v; $('rng').value=v; updRaiseLabel();
   });
-  $('bNew').onclick = ()=>newGame();
-  const tog=(k,ls)=>{ HINT[k]=!HINT[k]; try{ localStorage.setItem(ls, HINT[k]?'1':'0'); }catch(e){} paintToggles(); if (pm && !pm.pre) renderPhone(); };
+  // стол
+  $('bNew').onclick = ()=>backToLobby();
+  $('showAll').onchange = render;
+  $('bPhone').onclick = ()=>{ $('qrPanel').classList.add('on'); drawQR(); renderLobby(); };
+  $('bQrClose').onclick = ()=>$('qrPanel').classList.remove('on');
+  $('bStart').onclick = ()=>startGame();
+  $('botsSel').onclick = e=>{ const b=e.target.dataset && e.target.dataset.b; if (b===undefined) return; botsWanted=+b; try{ localStorage.setItem('hp_bots', botsWanted); }catch(_){} renderLobby(); syncPhones(true); };
+  // телефон
+  $('bJoin').onclick = phoneJoin;
+  $('pName').onkeydown = e=>{ if (e.key==='Enter') phoneJoin(); };
+  $('bRename').onclick = ()=>{ myName=''; renderPhone(); $('pName').focus(); };
+  const tog=(k,ls)=>{ HINT[k]=!HINT[k]; try{ localStorage.setItem(ls, HINT[k]?'1':'0'); }catch(e){} paintToggles(); if (pm && !pm.pre && !pm.full) renderPhone(); };
   $('tCombo').onclick=()=>tog('combo','hp_combo');
   $('tEq').onclick=()=>tog('eq','hp_eq');
-  const vtog=(k,ls)=>{ VIEW[k]=!VIEW[k]; try{ localStorage.setItem(ls, VIEW[k]?'1':'0'); }catch(e){} paintToggles(); if (pm && !pm.pre) renderPhone(); };
+  const vtog=(k,ls)=>{ VIEW[k]=!VIEW[k]; try{ localStorage.setItem(ls, VIEW[k]?'1':'0'); }catch(e){} paintToggles(); if (pm && !pm.pre && !pm.full) renderPhone(); };
   $('tHideCards').onclick=()=>vtog('cards','hp_hcards');
   $('tHideTable').onclick=()=>vtog('table','hp_htable');
   const ph=$('pHand');
@@ -778,13 +965,13 @@ if (UI){
   window.addEventListener('pointerup', peekOff);
   ph.addEventListener('contextmenu', e=>e.preventDefault());
   paintToggles();
-  $('showAll').onchange = render;
-  $('bPhone').onclick = ()=>{ $('qrPanel').classList.add('on'); drawQR(); };
-  $('bQrClose').onclick = ()=>{ $('qrPanel').classList.remove('on'); startIfNeeded(); };
-  const code = hashCode();
-  if (code) initPhone(code.c, code.b);
-  else { $('qrPanel').classList.add('on'); $('bQrClose').textContent='▶ Начать игру'; $('bQrClose').style.background='#2f8a4a'; initTable(); }
+
+  const m = location.hash.match(/^#p-([a-z0-9]{4,8})(?:-(\d))?$/);
+  ['actRow','raiseRow','bNext'].forEach(id=>$(id).style.display='none');
+  if (m) initPhone(m[1], +(m[2]||0));
+  else { $('qrPanel').classList.add('on'); initTable(); }
 }
+
 // для автотеста в node
 function checkChips(){ const s=P.reduce((a,p)=>a+p.stack,0); if (s!==START_STACK*N()) throw new Error('Фишки не сходятся: '+s); }
 if (!UI && typeof module!=='undefined') module.exports = { eval5, best7, handName, equity, setup:(d)=>{ delay=d; ALL_BOTS=true; }, newGame, startHand, state:()=>({P,handOver,handNo}) };
